@@ -1,9 +1,8 @@
-import "reflect-metadata";
-import { importSchema } from "graphql-import";
-import { GraphQLServer } from "graphql-yoga";
-import { resolvers } from "./resolvers";
+import { launch } from './utils/Promises'
 
-const typeDefs = importSchema("schema.graphql");
+async function main() {
+    const status = await launch();
+    console.log(status);
+}
 
-const server = new GraphQLServer({ typeDefs, resolvers });
-server.start(() => console.log("Server is running on localhost:4000"));
+main();
