@@ -42,9 +42,7 @@ test('Parse a prediction.', async () => {
     ]
     const psm = predictionPSM();
     const processed = psm(testData);
-    if (processed !== null) {
-        return true;
-    }
+    return processed !== null
     // processed.entries.forEach((entry:any)=>{
     //     console.log({
     //       header: entry.header,

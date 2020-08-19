@@ -1,5 +1,5 @@
 import { ExplodeEntriesInput } from "../inputs/ExplodeEntriesInput";
-import { fetchReadStream, pipe, clip, nano, fetchDownloadURL, save } from '../utils/Promises'
+import { fetchReadStream, pipe, clip, nano, fetchDownloadURL, format } from '../utils/Promises'
 import { predictionPSM } from '../psm/predictionPSM'
 import { join } from 'path';
 import * as fs from 'fs';
@@ -24,7 +24,7 @@ export async function explodeEntries(data: ExplodeEntriesInput): Promise<Entry[]
 
         // Clip the page into pieces and upload the pieces to BOX.
         const boxResponses = await Promise.all(data.boundingBoxes.map(box => {
-            const entryName = data.boxID + '-' + sfx + '.jpg'
+            const entryName = data.boxName + '-' + sfx + '.jpg'
             sfx += 1;
             return clip(pagePath, entryName, boxFolderID, box.xMin, box.xMax, box.yMin, box.yMax)
         }));
@@ -41,7 +41,7 @@ export async function explodeEntries(data: ExplodeEntriesInput): Promise<Entry[]
             return JSON.parse(response).result[0].prediction;
         });
 
-        // Put these parsed entries through the psm. 
+        // Put these parsed entries through the psm, reducing to a single Entry[]. 
         const rawEntries = parsedNano.reduce((acc, curr)=>{ 
             const psm = predictionPSM();
             const processed = psm(curr);
@@ -49,11 +49,10 @@ export async function explodeEntries(data: ExplodeEntriesInput): Promise<Entry[]
             return acc; 
         }, []);
 
-        // Save these entries into the database. 
-        const parsedEntries = await Promise.all(rawEntries.map(async (entry:any, index: number) => {        
-            return save(entry, boxResponses[index].entries[0].id);
+        // Run the raw entries through the formatter to create the Entry data type needed by GraphQL and MongoDB. 
+        const parsedEntries = await Promise.all<Entry>(rawEntries.map(async (entry:any) => {      
+            return format(entry, data.boxID, data.boxName);
         }))
-
 
         // Delete the temporary file. 
         fs.unlinkSync(pagePath);

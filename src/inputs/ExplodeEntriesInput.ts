@@ -1,14 +1,15 @@
-
 import { InputType, Field } from "type-graphql";
-import { Entry } from "../models/Entry";
-import { BoundingBoxInput } from './BoundingBoxInput'
+import { BoundingBoxInput } from "./BoundingBoxInput";
 
-@InputType()
-export class ExplodeEntriesInput implements Partial<Entry>{
+@InputType("ExplodeEntriesInput")
+export class ExplodeEntriesInput {
+  @Field()
+  boxID: string;
 
-    @Field()
-    boxID: string;
+  @Field()
+  boxName: string;
 
-    @Field(()=>[BoundingBoxInput])
-    boundingBoxes: [BoundingBoxInput]
+  @Field(() => [BoundingBoxInput])
+  boundingBoxes: [BoundingBoxInput];
 }
+

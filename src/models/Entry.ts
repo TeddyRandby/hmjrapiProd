@@ -1,51 +1,49 @@
-import { Entity, BaseEntity, Column, ObjectIdColumn } from "typeorm";
-import { Date } from './Date'
-import { Index } from './Index'
-import { PPT } from './PPT'
+import { Entity, BaseEntity, Column, ObjectIdColumn, ObjectID } from "typeorm";
+import { Date } from "./Date";
+import { Index } from "./Index";
+import { PPT } from "./PPT";
 import { ObjectType, Field } from "type-graphql";
 
 @Entity()
 @ObjectType()
 export class Entry extends BaseEntity {
-    
-    @Field(()=>String)
-    @ObjectIdColumn()
-    uuid: string;
+  @Field(() => String)
+  @ObjectIdColumn()
+  _id: ObjectID;
 
-    @Field(() => String)
-    @Column()
-    boxID: string;
+  @Field(() => String)
+  @Column()
+  boxID: string;
 
-    @Field(() => String)
-    @Column()
-    header: string;
+  @Field(() => String)
+  @Column()
+  book: string;
 
-    @Field(() => String)
-    @Column()
-    content: string;
+  @Field(() => String)
+  @Column()
+  header: string;
 
-    @Field(() => Date)
-    @Column()
-    dates: [Date];
+  @Field(() => String)
+  @Column()
+  content: string;
 
-    @Field(() => [Index])
-    @Column()
-    indexes: [Index];
+  @Field(() => [Date])
+  @Column()
+  dates: [Date];
 
-    @Field(() => [PPT])
-    @Column()
-    entities: [PPT];
+  @Field(() => [Index])
+  @Column()
+  indexes: [Index];
 
-    @Field(() => Date)
-    @Column()
-    minDate: Date;
+  @Field(() => [PPT])
+  @Column()
+  entities: [PPT];
 
-    @Field(() => Date)
-    @Column()
-    maxDate: Date;
+  @Field(() => Date)
+  @Column()
+  minDate: Date;
 
-    @Field(() => Number)
-    @Column()
-    confidence: number;
-
+  @Field(() => Date)
+  @Column()
+  maxDate: Date;
 }
