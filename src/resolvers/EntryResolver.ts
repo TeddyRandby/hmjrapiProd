@@ -1,5 +1,4 @@
 import { Resolver, Query, Mutation, Arg } from "type-graphql";
-
 import { Entry } from "../models/Entry";
 import { getMongoRepository } from "typeorm";
 import { ExplodeEntriesInput } from "../inputs/ExplodeEntriesInput";
