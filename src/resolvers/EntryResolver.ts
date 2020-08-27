@@ -5,6 +5,12 @@ import { ExplodeEntriesInput } from "../inputs/ExplodeEntriesInput";
 import { explodeEntries } from "../utils/ExplodeEntries";
 import { DateInput } from "../inputs/DateInput";
 import { EntryInput } from "../inputs/EntryInput";
+import { ObjectId } from "mongodb";
+import {
+  parseDateInput,
+  parseIndexInput,
+  parseEntityInput,
+} from "../utils/Promises";
 
 @Resolver()
 export class EntryResolver {
@@ -35,22 +41,23 @@ export class EntryResolver {
   // Grab entries within a certain date. TODO: Date range.
   @Query(() => [Entry])
   async entriesByDate(@Arg("date") data: DateInput, @Arg("max") max: number) {
+    let parsedData = await parseDateInput(data);
     return await getMongoRepository(Entry).find({
       take: max,
       where: {
         $and: [
           {
             $and: [
-              { "minDate.day": { $lte: data.day } },
-              { "minDate.month": { $lte: data.month } },
-              { "minDate.year": { $lte: data.year } },
+              { "minDate.day": { $lte: parsedData.day } },
+              { "minDate.month": { $lte: parsedData.month } },
+              { "minDate.year": { $lte: parsedData.year } },
             ],
           },
           {
             $and: [
-              { "maxDate.day": { $gte: data.day } },
-              { "maxDate.month": { $gte: data.month } },
-              { "maxDate.year": { $gte: data.year } },
+              { "maxDate.day": { $gte: parsedData.day } },
+              { "maxDate.month": { $gte: parsedData.month } },
+              { "maxDate.year": { $gte: parsedData.year } },
             ],
           },
         ],
@@ -72,26 +79,31 @@ export class EntryResolver {
     return entries;
   }
 
+  // For some reason the mongoDB ID is funky with typeORM and graphQL.
+  // This bug needs to be fixed.
   @Mutation(() => Entry)
   async updateEntry(@Arg("id") id: string, @Arg("data") data: EntryInput) {
-    const result = await getMongoRepository(Entry).findOneAndReplace(
-      {
-        where: {
-          _id: id,
-        },
+    //const replacement = await format(ent, boxID, boxName);
+    let original = await getMongoRepository(Entry).findOne({
+      where: {
+        _id: new ObjectId(id),
       },
-      {
-        book: data.book,
-        header: data.header,
-        content: data.content,
-        dates: data.dates,
-        indexes: data.indexes,
-        entities: data.entities,
-        minDate: data.minDate,
-        maxDate: data.maxDate,
-      }
-    );
-    console.log(result);
-    return result;
+    });
+    if (original !== undefined) {
+      original.book = data.book;
+      original.content = data.content;
+      original.header = data.header;
+      original.dates = await Promise.all(data.dates.map(parseDateInput));
+      original.indexes = await Promise.all(data.indexes.map(parseIndexInput));
+      original.entities = await Promise.all(
+        data.entities.map(parseEntityInput)
+      );
+      original.maxDate = await parseDateInput(data.maxDate);
+      original.minDate = await parseDateInput(data.minDate);
+      const result = await original?.save();
+      return result;
+    } else {
+      throw "Entry not found";
+    }
   }
 }

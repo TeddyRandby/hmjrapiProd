@@ -27,23 +27,23 @@ export class Entry extends BaseEntity {
   @Column()
   content: string;
 
-  @Field(() => [Date])
+  @Field(() => [Date], { nullable: true })
   @Column()
-  dates: [Date];
+  dates: Date[];
 
-  @Field(() => [Index])
+  @Field(() => [Index], { nullable: true })
   @Column()
-  indexes: [Index];
+  indexes: Index[];
 
-  @Field(() => [PPT])
+  @Field(() => [PPT], { nullable: true })
   @Column()
-  entities: [PPT];
+  entities: PPT[];
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @Column()
   minDate: Date;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @Column()
   maxDate: Date;
 }

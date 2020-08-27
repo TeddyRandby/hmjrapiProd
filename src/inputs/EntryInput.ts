@@ -5,9 +5,6 @@ import { Field, InputType } from "type-graphql";
 @InputType("EntryInput")
 export class EntryInput {
   @Field()
-  boxID: string;
-
-  @Field()
   book: string;
 
   @Field()
@@ -17,13 +14,13 @@ export class EntryInput {
   content: string;
 
   @Field(() => [DateInput])
-  dates: [DateInput];
+  dates: DateInput[];
 
   @Field(() => [IndexInput])
-  indexes: [IndexInput];
+  indexes: IndexInput[];
 
   @Field(() => [PPTInput])
-  entities: [PPTInput];
+  entities: PPTInput[];
 
   @Field(() => DateInput)
   minDate: DateInput;

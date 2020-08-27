@@ -6,8 +6,5 @@ export class IndexInput {
   content: string;
 
   @Field()
-  book: number;
-
-  @Field()
-  page: number;
+  stringified: string;
 }

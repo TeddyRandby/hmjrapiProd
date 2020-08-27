@@ -12,7 +12,11 @@ import { Entry } from "../models/Entry";
 import { Date } from "../models/Date";
 import { Index } from "../models/Index";
 import { PPT } from "../models/PPT";
+import { PSMDate, PSMEntry, PSMIndex } from "../psm/predictionPSM";
 import { dateGreaterThanOrEqualTo, dateLessThanOrEqualTo } from "./utils";
+import { DateInput } from "../inputs/DateInput";
+import { IndexInput } from "../inputs/IndexInput";
+import { PPTInput } from "../inputs/PPTInput";
 const Clipper = require("image-clipper");
 const client = require("../utils/Box");
 
@@ -167,9 +171,69 @@ export function nano(url: string): Promise<any> {
   });
 }
 
+export function parseDateInput(data: DateInput): Promise<Date> {
+  return new Promise(function (resolve, reject) {
+    const dte = new Date();
+
+    // There should only be one key per object.
+    dte.content = data.content;
+    dte.stringified = data.stringified;
+
+    // Do some regex matching here to find the day,month,year.
+    const dayMatch = data.stringified.match(new RegExp(/\/\d+\//g));
+    if (dayMatch !== null) {
+      dte.day = +dayMatch[0].replace(new RegExp(/\//g), "");
+    } else {
+      reject("no day found");
+    }
+    const monthMatch = data.stringified.match(new RegExp(/\d+\//g));
+    if (monthMatch !== null) {
+      dte.month = +monthMatch[0].replace(new RegExp(/\//g), "");
+    } else {
+      reject("no month found");
+    }
+    const yearMatch = data.stringified.match(new RegExp(/\/\d+/g));
+    if (yearMatch !== null) {
+      dte.year = +yearMatch[1].replace(new RegExp(/\//g), "");
+    } else {
+      reject("no year found");
+    }
+
+    resolve(dte);
+  });
+}
+
+export function parseIndexInput(data: IndexInput): Promise<Index> {
+  return new Promise(function (resolve, reject) {
+    const idx = new Index();
+    // Do some regex matching here to pull out the book and page.
+    // There should only be one key per object.
+    try {
+      idx.page = +data.stringified;
+      idx.content = data.content;
+      resolve(idx);
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+export function parseEntityInput(data: PPTInput): Promise<PPT> {
+  return new Promise(function (resolve, reject) {
+    // Temporary filler entry.
+    try {
+      const tempPPT = new PPT();
+      tempPPT.name = data.name;
+      resolve(tempPPT);
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
 // Create the Entry data type needed by Graphql and Mongodb.
 export function format(
-  entry: any,
+  entry: PSMEntry,
   boxID: string,
   boxName: string
 ): Promise<Entry> {
@@ -189,61 +253,38 @@ export function format(
       }, "");
 
       // These values have to be parsed, and create unique objects.
-      ent.dates = entry.dates.map((date: any) => {
-        const dte = new Date();
-
-        // There should only be one key per object.
-        Object.keys(date).forEach((key) => {
-          dte.content = entry.content[date[key]];
-          dte.stringified = key;
-
-          // Do some regex matching here to find the day,month,year.
-          const dayMatch = key.match(new RegExp(/\/\d+\//g));
-          if (dayMatch !== null) {
-            dte.day = +dayMatch[0].replace(new RegExp(/\//g), "");
+      ent.dates = await Promise.all(
+        entry.dates.map(async function (date: PSMDate) {
+          date.content = entry.content[date.pointer];
+          let dte = await parseDateInput(date);
+          // Check to see if minDate needs to be initialized or updated.
+          if (!ent.minDate) {
+            ent.minDate = dte;
+          } else if (dateLessThanOrEqualTo(dte, ent.minDate)) {
+            ent.minDate = dte;
           }
-          const monthMatch = key.match(new RegExp(/\d+\//g));
-          if (monthMatch !== null) {
-            dte.month = +monthMatch[0].replace(new RegExp(/\//g), "");
+
+          // Check to see if maxDate needs to be intialized or updated.
+          if (!ent.maxDate) {
+            ent.maxDate = dte;
+          } else if (dateGreaterThanOrEqualTo(dte, ent.maxDate)) {
+            ent.maxDate = dte;
           }
-          const yearMatch = key.match(new RegExp(/\/\d+/g));
-          if (yearMatch !== null) {
-            dte.year = +yearMatch[1].replace(new RegExp(/\//g), "");
-          }
-        });
+          return dte;
+        })
+      );
 
-        // Check to see if minDate needs to be initialized or updated.
-        if (!ent.minDate) {
-          ent.minDate = dte;
-        } else if (dateLessThanOrEqualTo(dte, ent.minDate)) {
-          ent.minDate = dte;
-        }
+      ent.entities = await Promise.all(
+        entry.entities.map((ppt: PPTInput) => {
+          return parseEntityInput(ppt);
+        })
+      );
 
-        // Check to see if maxDate needs to be intialized or updated.
-        if (!ent.maxDate) {
-          ent.maxDate = dte;
-        } else if (dateGreaterThanOrEqualTo(dte, ent.maxDate)) {
-          ent.maxDate = dte;
-        }
-
-        return dte;
-      });
-      ent.indexes = entry.pages.map((index: any) => {
-        const idx = new Index();
-        // Do some regex matching here to pull out the book and page.
-        // There should only be one key per object.
-        Object.keys(index).forEach((key) => {
-          idx.content = entry.content[index[key]];
-          idx.page = +key;
-        });
-
-        return idx;
-      });
-
-      // Temporary filler entry.
-      const tempPPT = new PPT();
-      tempPPT.name = "temp";
-      ent.entities = [tempPPT];
+      ent.indexes = await Promise.all(
+        entry.indexes.map((index: PSMIndex) => {
+          return parseIndexInput(index);
+        })
+      );
 
       resolve(ent);
     } catch (err) {
