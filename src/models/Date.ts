@@ -1,19 +1,16 @@
 import { Entity, BaseEntity, Column, PrimaryColumn } from "typeorm";
-import { ObjectType, Field } from "type-graphql";
+import { ObjectType, Field, InputType } from "type-graphql";
 
 @Entity()
 @ObjectType()
+@InputType("GQLDate")
 export class Date extends BaseEntity {
-
-  @Field(() => Number)
   @Column()
   day: number;
 
-  @Field(() => Number)
   @Column()
   month: number;
 
-  @Field(() => Number)
   @Column()
   year: number;
 
@@ -21,8 +18,7 @@ export class Date extends BaseEntity {
   @PrimaryColumn()
   stringified: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column()
   content: string;
-
 }

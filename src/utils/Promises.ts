@@ -1,4 +1,6 @@
 import * as fs from "fs";
+import * as automl from "@tensorflow/tfjs-automl";
+import * as tf from "@tensorflow/tfjs-node";
 import "reflect-metadata";
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
@@ -12,28 +14,31 @@ import { Entry } from "../models/Entry";
 import { Date } from "../models/Date";
 import { Index } from "../models/Index";
 import { PPT } from "../models/PPT";
-import { PSMDate, PSMEntry, PSMIndex } from "../psm/predictionPSM";
+import { PSMDate, PSMEntry, PSMIndex, PSMPpt } from "../psm/predictionPSM";
 import { dateGreaterThanOrEqualTo, dateLessThanOrEqualTo } from "./utils";
-import { DateInput } from "../inputs/DateInput";
-import { IndexInput } from "../inputs/IndexInput";
-import { PPTInput } from "../inputs/PPTInput";
+import { Tensor3D } from "@tensorflow/tfjs-node";
 const Clipper = require("image-clipper");
-const client = require("../utils/Box");
+const boxClient = require("./Box");
+const sizeOf = require("image-size");
+import googleClient from "./Google";
+import * as google from "@google-cloud/automl";
 
-// Launch the server.
 export function launch(): Promise<String> {
   return new Promise(async function (resolve, reject) {
     try {
       const connectionOptions = await getConnectionOptions();
-      await createConnection(connectionOptions);
+      await createConnection(connectionOptions).catch(reject);
       const schema = await buildSchema({
         resolvers: [EntryResolver],
         validate: false,
-      });
-      const server = new ApolloServer({ schema });
-      await server.listen(4000);
-      resolve("Server has launched!");
+      }).catch(reject);
+      if (schema !== undefined) {
+        const server = new ApolloServer({ schema });
+        await server.listen(4000);
+        resolve("Server has launched!");
+      }
     } catch (err) {
+      console.log(err);
       reject(err);
     }
   });
@@ -42,7 +47,7 @@ export function launch(): Promise<String> {
 // Fetch a file's read stream from BOX API.
 export function fetchReadStream(boxFileID: String): Promise<fs.ReadStream> {
   return new Promise(function (resolve, reject) {
-    client.default.files.getReadStream(boxFileID, null, function (
+    boxClient.default.files.getReadStream(boxFileID, null, function (
       error: any,
       stream: fs.ReadStream
     ) {
@@ -58,7 +63,7 @@ export function fetchReadStream(boxFileID: String): Promise<fs.ReadStream> {
 // Fetch a file's download URL from BOX API.
 export function fetchDownloadURL(boxFileID: String): Promise<string> {
   return new Promise(function (resolve, reject) {
-    client.default.files
+    boxClient.default.files
       .getDownloadURL(boxFileID)
       .then((url: string) => {
         resolve(url);
@@ -90,10 +95,10 @@ export function uploadFile(
   stream: fs.ReadStream
 ): Promise<any> {
   return new Promise(function (resolve, reject) {
-    client.default.files
+    boxClient.default.files
       .uploadFile(boxFolderID, name, stream)
       .then((file: any) => resolve(file))
-      .catch((err: any) => reject(err));
+      .catch(reject);
   });
 }
 
@@ -102,10 +107,10 @@ export function clip(
   pagePath: string,
   entryName: string,
   boxFolderID: string,
-  xMin: number,
-  xMax: number,
-  yMin: number,
-  yMax: number
+  left: number,
+  width: number,
+  top: number,
+  height: number
 ): Promise<any> {
   return new Promise(function (resolve, reject) {
     Clipper.configure({
@@ -115,21 +120,20 @@ export function clip(
       // Make the cropped item path
       const entryPath = join("src", "temp", "entries", entryName + ".jpg");
 
-      // Calc the width and height
-      const w = xMax - xMin;
-      const h = yMax - yMin;
       // Crop the image and load it into the entry path.
-      this.crop(xMin, yMin, w, h).toFile(entryPath, async () => {
+      this.crop(left, top, width, height).toFile(entryPath, async () => {
         // Create a read stream for uploading.
         const ustream = fs.createReadStream(entryPath);
 
         // Upload the new cropped entries to box.
         // TODO: handle replacing entries that already exist.
-        const result = await uploadFile(boxFolderID, entryName, ustream).catch(
-          (err: any) => {
-            if (err.statusCode !== 409) reject(err);
-          }
-        );
+        const result = await uploadFile(
+          boxFolderID,
+          entryName + ".jpg",
+          ustream
+        ).catch((err: any) => {
+          if (err.statusCode !== 409) reject(err);
+        });
 
         fs.unlinkSync(entryPath);
         resolve(result);
@@ -171,7 +175,7 @@ export function nano(url: string): Promise<any> {
   });
 }
 
-export function parseDateInput(data: DateInput): Promise<Date> {
+export function parseDateInput(data: PSMDate | Date): Promise<Date> {
   return new Promise(function (resolve, reject) {
     const dte = new Date();
 
@@ -203,7 +207,7 @@ export function parseDateInput(data: DateInput): Promise<Date> {
   });
 }
 
-export function parseIndexInput(data: IndexInput): Promise<Index> {
+export function parseIndexInput(data: PSMIndex | Index): Promise<Index> {
   return new Promise(function (resolve, reject) {
     const idx = new Index();
     // Do some regex matching here to pull out the book and page.
@@ -218,7 +222,7 @@ export function parseIndexInput(data: IndexInput): Promise<Index> {
   });
 }
 
-export function parseEntityInput(data: PPTInput): Promise<PPT> {
+export function parseEntityInput(data: PSMPpt | PPT): Promise<PPT> {
   return new Promise(function (resolve, reject) {
     // Temporary filler entry.
     try {
@@ -275,7 +279,7 @@ export function format(
       );
 
       ent.entities = await Promise.all(
-        entry.entities.map((ppt: PPTInput) => {
+        entry.entities.map((ppt: PSMPpt) => {
           return parseEntityInput(ppt);
         })
       );
@@ -290,5 +294,115 @@ export function format(
     } catch (err) {
       reject(err);
     }
+  });
+}
+
+export function startTFModel(): Promise<automl.ObjectDetectionModel> {
+  const modelUrl: string =
+    "C://Users/tedra/source/repos/hmjrAPI/src/tf/34hrsTrained/model.json";
+  const loadDictionary = (modelUrl: string) => {
+    const lastIndexOfSlash = modelUrl.lastIndexOf("/");
+    const prefixURL =
+      lastIndexOfSlash >= 0 ? modelUrl.slice(0, lastIndexOfSlash + 1) : "";
+    const dictUrl: string = `${prefixURL}dict.txt`;
+    const text = fs.readFileSync(dictUrl, { encoding: "utf-8" });
+    return text.trim().split("\n");
+  };
+  return new Promise(async function (resolve, reject) {
+    try {
+      const [model, dict] = await Promise.all([
+        tf.loadGraphModel(`file://${modelUrl}`),
+        loadDictionary(modelUrl),
+      ]);
+      resolve(new automl.ObjectDetectionModel(model, dict));
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+export function decodeImage(imageUrl: string): Promise<Tensor3D> {
+  return new Promise(function (resolve, reject) {
+    const imgSrc = fs.readFileSync(imageUrl);
+    const arrByte: Uint8Array = Uint8Array.from(Buffer.from(imgSrc));
+    const imgTensor: Tensor3D = tf.node.decodeJpeg(arrByte, 3);
+    if (imgTensor != undefined) {
+      resolve(imgTensor);
+    } else {
+      reject("Tensor was undefined. Check image path.");
+    }
+  });
+}
+
+export async function getPredictor(): Promise<
+  (imageurl: string) => Promise<automl.PredictedObject[]>
+> {
+  const model = await startTFModel();
+  return async (imageurl: string) => {
+    const decodedImage = await decodeImage(imageurl);
+    const data: automl.PredictedObject[] = await model.detect(decodedImage);
+    decodedImage.dispose();
+    return data;
+  };
+}
+
+export async function cloudPredict(
+  boxID: string
+): Promise<google.protos.google.cloud.automl.v1.IPredictResponse> {
+  return new Promise(async (resolve, reject) => {
+    const pagePath = join("src", "temp", "pages", boxID + ".jpg");
+    const wstream = fs.createWriteStream(pagePath);
+    const rstream = await fetchReadStream(boxID).catch(reject);
+
+    if (rstream) {
+      await pipe(rstream, wstream).catch(reject);
+    } else {
+      reject("No valid read stream")
+    }
+
+    const projectId = "hmjri-280502";
+    const location = "us-central1";
+    const modelId = "IOD8192261027442720768";
+    const content = fs.readFileSync(pagePath);
+    const bytes = Uint8Array.from(content);
+    const dimensions = sizeOf(pagePath);
+    const request = {
+      name: googleClient.modelPath(projectId, location, modelId),
+      payload: {
+        image: {
+          imageBytes: bytes,
+        },
+      },
+    };
+
+    fs.unlinkSync(pagePath);
+    let [response] = await googleClient.predict(request);
+    if (response.payload) {
+      response.payload = response.payload.map((item) => {
+        if (item.imageObjectDetection) {
+          if (item.imageObjectDetection.boundingBox) {
+            if (item.imageObjectDetection.boundingBox.normalizedVertices) {
+              item.imageObjectDetection.boundingBox.normalizedVertices = item.imageObjectDetection.boundingBox.normalizedVertices.map(
+                (vertex) => {
+                  if (vertex.x && vertex.y) {
+                    const newX = vertex.x * dimensions.width;
+                    const newY = vertex.y * dimensions.height;
+                    const newVertex: google.protos.google.cloud.automl.v1.INormalizedVertex = { x: newX, y: newY }
+                    return newVertex
+                  } else {
+                    return vertex;
+                  }
+                }
+              )
+            }
+          }
+        }
+        return item;
+      }
+      );
+    } else {
+      reject("no payload")
+    }
+    resolve(response);
   });
 }

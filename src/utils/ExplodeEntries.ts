@@ -1,4 +1,4 @@
-import { ExplodeEntriesInput } from "../inputs/ExplodeEntriesInput";
+import { GQLExplodeEntries } from "../graphql/GQLExplodeEntries";
 import {
   fetchReadStream,
   pipe,
@@ -11,11 +11,12 @@ import { predictionPSM } from "../psm/predictionPSM";
 import { join } from "path";
 import * as fs from "fs";
 import { Entry } from "../models/Entry";
+import { BoundingBox } from "../graphql/BoundingBox";
 
-const boxFolderID = "117343777715"; // test: 117343777715, production: 116491174022
+const BOX_FOLDER_ID = process.env.BOXFOLDER + "";
 
 export async function explodeEntries(
-  data: ExplodeEntriesInput
+  data: GQLExplodeEntries
 ): Promise<Entry[]> {
   return new Promise(async (resolve, reject) => {
     // Create path and stream consts
@@ -34,27 +35,35 @@ export async function explodeEntries(
 
     // Clip the page into pieces and upload the pieces to BOX.
     const boxResponses = await Promise.all(
-      data.boundingBoxes.map((box) => {
-        const entryName = data.boxName + "-" + sfx + ".jpg";
-        sfx += 1;
-        return clip(
-          pagePath,
-          entryName,
-          boxFolderID,
-          box.xMin,
-          box.xMax,
-          box.yMin,
-          box.yMax
-        );
+      data.boundingBoxes.map((box: BoundingBox) => {
+        try {
+          const entryName = data.boxName + "-" + sfx + ".jpg";
+          sfx += 1;
+          return clip(
+            pagePath,
+            entryName,
+            BOX_FOLDER_ID,
+            box.left,
+            box.width,
+            box.top,
+            box.height
+          );
+        } catch (err) {
+          throw "Error clipping boxes.\n" + err;
+        }
       })
     );
 
     // Using their download URLs, run the clips through Nanonets.
     const rawNano = await Promise.all(
-      boxResponses.map(async (response) => {
-        const boxFileID = response.entries[0].id;
-        const url = await fetchDownloadURL(boxFileID);
-        return nano(url);
+      boxResponses.map(async (response: any) => {
+        try {
+          const boxFileID = response.entries[0].id;
+          const url = await fetchDownloadURL(boxFileID);
+          return nano(url);
+        } catch (err) {
+          throw "Error fetching nano.\n" + err;
+        }
       })
     );
 

@@ -1,29 +1,35 @@
 import { Entity, BaseEntity, Column, ObjectIdColumn, ObjectID } from "typeorm";
-import { Date } from "./Date";
-import { Index } from "./Index";
-import { PPT } from "./PPT";
-import { ObjectType, Field } from "type-graphql";
+import { Date } from "../models/Date";
+import { Index } from "../models/Index";
+import { PPT } from "../models/PPT";
+import { ObjectType, Field, InputType } from "type-graphql";
+import { Page } from "./Page";
 
 @Entity()
 @ObjectType()
+@InputType("GQLEntry")
 export class Entry extends BaseEntity {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @ObjectIdColumn()
   _id: ObjectID;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column()
   boxID: string;
 
-  @Field(() => String)
+  @Field(() => Page, { nullable: true })
+  @Column()
+  page: Page;
+
+  @Field(() => String, { nullable: true })
   @Column()
   book: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column()
   header: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column()
   content: string;
 

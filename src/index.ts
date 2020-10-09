@@ -1,8 +1,8 @@
-import { launch } from './utils/Promises'
+import { launch } from "./utils/Promises";
 
 async function main() {
-    const status = await launch();
-    console.log(status);
+  const status = await launch();
+  console.log(status);
 }
 
 main();
