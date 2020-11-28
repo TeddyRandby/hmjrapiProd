@@ -14,7 +14,9 @@ import {
 } from "../utils/Promises";
 import { BoundingBox } from "../graphql/BoundingBox";
 import { explodeBoxes } from "../utils/ExplodeBoxes";
+import { cloudExplodeBoxes } from "../utils/CloudExplodeBoxes"
 import { GQLClipBox } from "../graphql/GQLClipBox";
+import { drawBox } from "../utils/DrawBox";
 
 @Resolver()
 export class EntryResolver {
@@ -75,6 +77,18 @@ export class EntryResolver {
   @Query(() => [BoundingBox])
   async explodeBoxes(@Arg("BoxID") data: string) {
     const boxes = await explodeBoxes(data);
+    return boxes;
+  }
+
+  @Query(() => String)
+  async drawBoxes(@Arg("GQLExplodeEntries") data: GQLExplodeEntries) {
+    const status = await drawBox(data);
+    return status;
+  }
+
+  @Query(() => [BoundingBox])
+  async cloudExplodeBoxes(@Arg("BoxID") data: string) {
+    const boxes = await cloudExplodeBoxes(data);
     return boxes;
   }
 

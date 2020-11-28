@@ -5,10 +5,10 @@ import {
     fetchReadStream,
     pipe,
     clip,
+    makeEntrySubFolder
 } from "../utils/Promises";
 import * as fs from "fs";
 
-const BOX_FOLDER_ID = process.env.BOXFOLDER + "";
 
 export async function clipBox(
     data: GQLClipBox
@@ -25,26 +25,29 @@ export async function clipBox(
         await pipe(rstream, wstream);
 
         let sfx = 0;
-        await Promise.all(
-            data.boundingBoxes.map((box: BoundingBox) => {
-                try {
-                    const entryName = data.boxID + "-" + sfx;
-                    sfx += 1;
-                    return clip(
-                        pagePath,
-                        entryName,
-                        BOX_FOLDER_ID,
-                        box.left,
-                        box.width,
-                        box.top,
-                        box.height
-                    );
-                } catch (err) {
-                    reject(err);
-                    return null;
-                }
-            })
-        );
+        const parentFolderID = await makeEntrySubFolder(data.boxID).catch(reject);
+        if (parentFolderID) {
+            await Promise.all(
+                data.boundingBoxes.map(async (box: BoundingBox) => {
+                    try {
+                        const entryName = data.boxID + "-" + sfx;
+                        sfx += 1;
+                        return clip(
+                            pagePath,
+                            entryName,
+                            parentFolderID,
+                            box.left,
+                            box.width,
+                            box.top,
+                            box.height
+                        );
+                    } catch (err) {
+                        reject(err);
+                        return null;
+                    }
+                })
+            );
+        }
         fs.unlinkSync(pagePath);
         resolve("success.");
     })

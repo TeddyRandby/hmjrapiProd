@@ -44,6 +44,16 @@ export function launch(): Promise<String> {
   });
 }
 
+export function readFile(file: string): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    fs.readFile(file, (err: any, buff: Buffer) => {
+      if (err) reject(err)
+      resolve(buff)
+    })
+
+  })
+}
+
 // Fetch a file's read stream from BOX API.
 export function fetchReadStream(boxFileID: String): Promise<fs.ReadStream> {
   return new Promise(function (resolve, reject) {
@@ -102,6 +112,44 @@ export function uploadFile(
   });
 }
 
+export function getParentID(fileID: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    try {
+      boxClient.default.files.get(fileID).then((file: any) => {
+        resolve(file.parent.id);
+      })
+    } catch (err) {
+      reject(err);
+    }
+  })
+}
+
+export function getFileName(fileID: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    try {
+      boxClient.default.files.get(fileID).then((file: any) => {
+        resolve(file.name.substring(0, file.name.length - 4));
+      })
+    } catch (err) {
+      reject(err);
+    }
+  })
+}
+
+export function makeEntrySubFolder(fileID: string): Promise<string> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const parent = await getParentID(fileID);
+      const imageName = await getFileName(fileID);
+      boxClient.default.folders.create(parent, imageName + "_entries").then((folder: any) => {
+        resolve(folder.id)
+      }).catch(reject);
+    } catch (err) {
+      reject(err);
+    }
+  })
+
+}
 // Clip out a sub image.
 export function clip(
   pagePath: string,
@@ -363,7 +411,7 @@ export async function cloudPredict(
     const projectId = "hmjri-280502";
     const location = "us-central1";
     const modelId = "IOD8192261027442720768";
-    const content = fs.readFileSync(pagePath);
+    const content = await readFile(pagePath);
     const bytes = Uint8Array.from(content);
     const dimensions = sizeOf(pagePath);
     const request = {

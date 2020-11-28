@@ -28,6 +28,7 @@
     "image-clipper": "^0.4.4",
     "image-size": "^0.9.1",
     "mongodb": "^3.6.2",
+    "pureimage": "^0.2.5",
     "querystring": "^0.2.0",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
@@ -35,8 +36,8 @@
     "typeorm": "^0.2.28"
   },
   "scripts": {
-    "test": "SET GOOGLE_APPLICATION_CREDENTIALS=hmjri-280502-1ade4f753694.json&&SET NODE_ENV=development&&jest",
-    "test-server": "SET GOOGLE_APPLICATION_CREDENTIALS=hmjri-280502-1ade4f753694.json&&SET NODE_ENV=development&&SET BOXFOLDER=117343777715&&nodemon --exec ts-node src/index.ts",
-    "start": "SET GOOGLE_APPLICATION_CREDENTIALS=hmjri-280502-1ade4f753694.json&&SET NODE_ENV=production&&SET BOXFOLDER=116491174022&&nodemon --exec ts-node src/index.ts"
+    "test": "SET GOOGLE_APPLICATION_CREDENTIALS=hmjri-280502-f3331490a983.json&&SET NODE_ENV=development&&jest",
+    "test-server": "SET GOOGLE_APPLICATION_CREDENTIALS=hmjri-280502-f3331490a983.json&&SET NODE_ENV=development&&SET BOXFOLDER=116482128954&&nodemon --exec ts-node src/index.ts",
+    "start": "SET GOOGLE_APPLICATION_CREDENTIALS=hmjri-280502-f3331490a983.json&&SET NODE_ENV=production&&SET BOXFOLDER=116482128954&&nodemon --exec ts-node src/index.ts"
   }
 }
