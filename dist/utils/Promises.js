@@ -20,7 +20,21 @@ function launch() {
     return new Promise(function (resolve, reject) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const connectionOptions = yield typeorm_1.getConnectionOptions();
+                let connectionOptions = {
+                    "type": "mongodb",
+                    "database": "test",
+                    "logging": false,
+                    "url": process.env.DATABASE_URL,
+                    "useUnifiedTopology": true,
+                    "entities": ["src/models/**/*.ts"],
+                    "migrations": ["src/migration/**/*.ts"],
+                    "subscribers": ["src/subscriber/**/*.ts"],
+                    "cli": {
+                        "entitiesDir": "src/entity",
+                        "migrationsDir": "src/migration",
+                        "subscribersDir": "src/subscriber"
+                    }
+                };
                 yield typeorm_1.createConnection(connectionOptions).catch(reject);
                 const schema = yield type_graphql_1.buildSchema({
                     resolvers: [EntryResolver_1.EntryResolver],

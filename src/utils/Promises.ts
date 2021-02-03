@@ -2,13 +2,29 @@ import * as fs from "fs";
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 import { EntryResolver } from "../resolvers/EntryResolver"; // add this
-import { getConnectionOptions, createConnection } from "typeorm";
+import {createConnection, ConnectionOptions } from "typeorm";
 const boxClient = require("./Box");
 
 export function launch(): Promise<String> {
   return new Promise(async function (resolve, reject) {
     try {
-      const connectionOptions = await getConnectionOptions();
+      
+      let connectionOptions:ConnectionOptions = {
+        "type": "mongodb",
+        "database": "test",
+        "logging": false,
+        "url": process.env.DATABASE_URL,
+        "useUnifiedTopology": true,
+        "entities": ["src/models/**/*.ts"],
+        "migrations": ["src/migration/**/*.ts"],
+        "subscribers": ["src/subscriber/**/*.ts"],
+        "cli": {
+          "entitiesDir": "src/entity",
+          "migrationsDir": "src/migration",
+          "subscribersDir": "src/subscriber"
+        }
+      };
+
       await createConnection(connectionOptions).catch(reject);
       const schema = await buildSchema({
         resolvers: [EntryResolver],
