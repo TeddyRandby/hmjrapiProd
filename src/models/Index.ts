@@ -3,7 +3,7 @@ import { ObjectType, Field, InputType } from "type-graphql";
 
 @Entity()
 @ObjectType()
-@InputType("GQLIndex")
+@InputType("IndexInput")
 export class Index extends BaseEntity {
   @Field(() => String, { nullable: true })
   @PrimaryColumn()

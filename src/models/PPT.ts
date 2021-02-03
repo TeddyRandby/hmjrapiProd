@@ -3,7 +3,7 @@ import { ObjectType, Field, InputType } from "type-graphql";
 
 @Entity()
 @ObjectType()
-@InputType("GQLPpt")
+@InputType("EntityInput")
 export class PPT extends BaseEntity {
   @Field(() => String)
   @PrimaryColumn()

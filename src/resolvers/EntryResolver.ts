@@ -1,22 +1,8 @@
 import { Resolver, Query, Mutation, Arg } from "type-graphql";
 import { Entry } from "../models/Entry";
-import { Page } from "../models/Page";
 import { Date } from "../models/Date";
 import { getMongoRepository } from "typeorm";
-import { GQLExplodeEntries } from "../graphql/GQLExplodeEntries";
-import { explodeEntries } from "../utils/ExplodeEntries";
-import { clipBox } from "../utils/ClipBox";
-import { ObjectId } from "mongodb";
-import {
-  parseDateInput,
-  parseIndexInput,
-  parseEntityInput,
-} from "../utils/Promises";
-import { BoundingBox } from "../graphql/BoundingBox";
-import { explodeBoxes } from "../utils/ExplodeBoxes";
-import { cloudExplodeBoxes } from "../utils/CloudExplodeBoxes"
-import { GQLClipBox } from "../graphql/GQLClipBox";
-import { drawBox } from "../utils/DrawBox";
+import { findLeastDate, findGreatestDate } from "../utils/utils"
 
 @Resolver()
 export class EntryResolver {
@@ -26,8 +12,19 @@ export class EntryResolver {
 
   // Grab entries indiscriminantly.
   @Query(() => [Entry])
-  async entries(@Arg("max") max: number, @Arg("offset") offset: number) {
+  async entries(@Arg("max") max: number,@Arg("offset") offset: number) {
     return await getMongoRepository(Entry).find({ take: max, skip: offset });
+  }
+
+  // Quick fix for entries where Index wasn't parsed correctly.
+  @Query(() => [Entry])
+  async entriesByBoxID(@Arg("id") id: string) {
+    let entries = await getMongoRepository(Entry).find({
+      where: {
+        boxID: { $eq: id }        
+      }
+    })
+    return entries.map(entry=>({...entry, indexes: entry.indexes.map(index=>({...index, stringified: index.page.toString()}))}));
   }
 
   // Grab entries with a certain keyword present. TODO: Multiple keywords.
@@ -49,24 +46,24 @@ export class EntryResolver {
 
   // Grab entries within a certain date. TODO: Date range.
   @Query(() => [Entry])
-  async entriesByDate(@Arg("GQLDate") data: Date, @Arg("max") max: number) {
-    let parsedData = await parseDateInput(data);
+  async entriesByDate(@Arg("date") date: Date, @Arg("max") max: number) {
+    console.log(date.month, date.day, date.year)
     return await getMongoRepository(Entry).find({
       take: max,
       where: {
         $and: [
           {
             $and: [
-              { "minDate.day": { $lte: parsedData.day } },
-              { "minDate.month": { $lte: parsedData.month } },
-              { "minDate.year": { $lte: parsedData.year } },
+              { "minDate.day": { $lte: date.day } },
+              { "minDate.month": { $lte: date.month } },
+              { "minDate.year": { $lte: date.year } },
             ],
           },
           {
             $and: [
-              { "maxDate.day": { $gte: parsedData.day } },
-              { "maxDate.month": { $gte: parsedData.month } },
-              { "maxDate.year": { $gte: parsedData.year } },
+              { "maxDate.day": { $gte: date.day } },
+              { "maxDate.month": { $gte: date.month } },
+              { "maxDate.year": { $gte: date.year } },
             ],
           },
         ],
@@ -74,95 +71,77 @@ export class EntryResolver {
     });
   }
 
-  @Query(() => [BoundingBox])
-  async explodeBoxes(@Arg("BoxID") data: string) {
-    const boxes = await explodeBoxes(data);
-    return boxes;
-  }
-
-  @Query(() => String)
-  async drawBoxes(@Arg("GQLExplodeEntries") data: GQLExplodeEntries) {
-    const status = await drawBox(data);
-    return status;
-  }
-
-  @Query(() => [BoundingBox])
-  async cloudExplodeBoxes(@Arg("BoxID") data: string) {
-    const boxes = await cloudExplodeBoxes(data);
-    return boxes;
-  }
-
-  @Query(() => String)
-  async clipBoxes(@Arg("GQLClipBox") data: GQLClipBox) {
-    const status = await clipBox(data);
-    return status;
+  @Query(() => [Entry])
+  async entriesByBook(@Arg("book") book: string, @Arg("max") max: number) {
+    let entries = await getMongoRepository(Entry).find({
+      take: max,
+      where: {
+        book: book 
+      }
+    });
+    entries.forEach(entry=>console.log(findLeastDate(entry.dates)))
+    return entries;
   }
 
   /* ------ Mutations ------ */
 
-  @Mutation(() => [Entry])
-  async explodeFull(@Arg("BoxID") data: string, @Arg("BoxName") name: string) {
-    const boxes = await explodeBoxes(data);
-    const explodeEntriesInput: GQLExplodeEntries = {
-      boxID: data,
-      boxName: name,
-      boundingBoxes: boxes,
-    };
-    const rawEntries = await explodeEntries(explodeEntriesInput);
-    const entries = getMongoRepository(Entry).create(rawEntries);
-    const page = getMongoRepository(Page).create({
-      boxID: data,
-      entries: entries.map((entry) => entry._id),
-    });
-    await page.save();
-    entries.forEach(async (entry) => {
-      entry.page = page;
-      await entry.save();
-    });
-    return entries;
-  }
-  // Explode a box image into the entries as given. Then send those off to NanoNet
-  // for an initial entry in the db.
-  @Mutation(() => [Entry])
-  async explodeEntries(@Arg("GQLExplodeEntries") data: GQLExplodeEntries) {
-    const rawEntries = await explodeEntries(data);
-    const entries = getMongoRepository(Entry).create(rawEntries);
-    const page = getMongoRepository(Page).create({
-      boxID: data.boxID,
-      entries: entries.map((entry) => entry._id),
-    });
-    await page.save();
-    entries.forEach(async (entry) => {
-      entry.page = page;
-      await entry.save();
-    });
-    return entries;
+  /*
+   * Update a single entry
+   */
+  @Mutation(() => Entry)
+  async updateEntry(@Arg("id") id: string, @Arg("entry") entry: Entry) {
+    let original = await getMongoRepository(Entry).findOne(id);
+
+    if (!original)
+      return original
+
+    if (entry.header)
+      original.header = entry.header;
+
+    if (entry.content)
+      original.content = entry.content;
+
+    if (entry.book)
+      original.book = entry.book;
+
+    if (entry.dates) {
+      original.dates = entry.dates;
+
+      let least = findLeastDate(entry.dates);
+      if (least)
+        original.minDate = least;
+
+      let greatest = findGreatestDate(entry.dates);
+      if (greatest)
+        original.maxDate = greatest;
+    }
+
+    if (entry.indexes)
+      original.indexes = entry.indexes;
+
+    await original.save();
+
+    return original;
   }
 
-  @Mutation(() => Entry)
-  async updateEntry(@Arg("id") id: string, @Arg("GQLEntry") data: Entry) {
+  /*
+   * Update all entries associated with a certain boxID page
+   */
+  @Mutation(() => [Entry])
+  async updatePage(@Arg("id") id: string, @Arg("entry") entry: Entry) {
     //const replacement = await format(ent, boxID, boxName);
-    let original = await getMongoRepository(Entry).findOne({
+    let original = await getMongoRepository(Entry).find({
       where: {
-        _id: new ObjectId(id),
-      },
+        boxID: id 
+      }
     });
+
+    console.log(entry);
+
     // Switch this to pulling the max and min dates out of dates. (Not Manual)
-    if (original !== undefined) {
-      original.book = data.book;
-      original.content = data.content;
-      original.header = data.header;
-      original.dates = await Promise.all(data.dates.map(parseDateInput));
-      original.indexes = await Promise.all(data.indexes.map(parseIndexInput));
-      original.entities = await Promise.all(
-        data.entities.map(parseEntityInput)
-      );
-      original.maxDate = await parseDateInput(data.maxDate);
-      original.minDate = await parseDateInput(data.minDate);
-      const result = await original.save();
-      return result;
-    } else {
-      throw "Entry not found";
-    }
-  }
+
+    return original;
+
+    } 
+  
 }

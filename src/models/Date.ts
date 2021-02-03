@@ -3,18 +3,21 @@ import { ObjectType, Field, InputType } from "type-graphql";
 
 @Entity()
 @ObjectType()
-@InputType("GQLDate")
+@InputType("DateInput")
 export class Date extends BaseEntity {
+  @Field(() => Number)
   @Column()
   day: number;
 
+  @Field(() => Number)
   @Column()
   month: number;
 
+  @Field(() => Number)
   @Column()
   year: number;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true})
   @PrimaryColumn()
   stringified: string;
 

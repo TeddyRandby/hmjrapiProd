@@ -3,7 +3,7 @@ import { ObjectType, Field, InputType } from "type-graphql";
 
 @Entity()
 @ObjectType()
-@InputType("GQLInput")
+@InputType("PageInput")
 export class Page extends BaseEntity {
   @Field(() => String)
   @ObjectIdColumn()

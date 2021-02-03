@@ -7,7 +7,7 @@ import { Page } from "./Page";
 
 @Entity()
 @ObjectType()
-@InputType("GQLEntry")
+@InputType("EntryInput")
 export class Entry extends BaseEntity {
   @Field(() => String, { nullable: true })
   @ObjectIdColumn()
