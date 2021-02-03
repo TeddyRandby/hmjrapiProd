@@ -15,9 +15,9 @@ export function launch(): Promise<String> {
         "logging": false,
         "url": process.env.DATABASE_URL,
         "useUnifiedTopology": true,
-        "entities": [__dirname + "src/models/**/*.ts", __dirname + "dist/models/**/*.js"],
-        "migrations": [__dirname + "src/migration/**/*.ts", __dirname + "dist/migration/**/*.js"],
-        "subscribers": [__dirname + "src/subscriber/**/*.ts", __dirname + "dist/subscriber/**/*.js"],
+        "entities": [__dirname + "src/models/**/*.ts", __dirname + "../dist/models/**/*.js"],
+        "migrations": [__dirname + "src/migration/**/*.ts", __dirname + "../dist/migration/**/*.js"],
+        "subscribers": [__dirname + "src/subscriber/**/*.ts", __dirname + "../dist/subscriber/**/*.js"],
         "cli": {
           "entitiesDir": "src/entity",
           "migrationsDir": "src/migration",
