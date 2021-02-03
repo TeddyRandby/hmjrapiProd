@@ -20,13 +20,14 @@ function launch() {
     return new Promise(function (resolve, reject) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log(__dirname);
                 let connectionOptions = {
                     "type": "mongodb",
                     "database": "test",
                     "logging": false,
                     "url": process.env.DATABASE_URL,
                     "useUnifiedTopology": true,
-                    "entities": [__dirname + "src/models/**/*.ts", __dirname + "models/**/*.js"],
+                    "entities": [__dirname + "src/models/**/*.ts", __dirname + "./dist/models/**/*.js"],
                     "migrations": [__dirname + "src/migration/**/*.ts", __dirname + "dist/migration/**/*.js"],
                     "subscribers": [__dirname + "src/subscriber/**/*.ts", __dirname + "dist/subscriber/**/*.js"],
                     "cli": {
