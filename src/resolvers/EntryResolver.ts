@@ -24,7 +24,7 @@ export class EntryResolver {
         boxID: { $eq: id }        
       }
     })
-    return entries.map(entry=>({...entry, indexes: entry.indexes.map(index=>({...index, stringified: index.page.toString()}))}));
+    return entries.map(entry=>({...entry, indexes: entry.indexes.map(index=>({...index,book: entry.book, stringified: index.page.toString()}))}));
   }
 
   // Grab entries with a certain keyword present. TODO: Multiple keywords.
@@ -72,12 +72,14 @@ export class EntryResolver {
 
   @Query(() => [Entry])
   async entriesByBook(@Arg("book") book: string, @Arg("max") max: number) {
-    return await getMongoRepository(Entry).find({
+    let entries = await getMongoRepository(Entry).find({
       take: max,
       where: {
         book: book 
       }
     });
+
+    return entries.map(entry=>({...entry, indexes: entry.indexes.map(index=>({...index,book: entry.book, stringified: index.page.toString()}))}));
   }
 
   /* ------ Mutations ------ */
