@@ -74,7 +74,7 @@ __decorate([
     __metadata("design:type", Date_1.Date)
 ], Entry.prototype, "maxDate", void 0);
 Entry = __decorate([
-    typeorm_1.Entity(),
+    typeorm_1.Entity("Entry"),
     type_graphql_1.ObjectType(),
     type_graphql_1.InputType("EntryInput")
 ], Entry);

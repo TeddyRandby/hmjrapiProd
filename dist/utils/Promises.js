@@ -27,9 +27,9 @@ function launch() {
                     "logging": false,
                     "url": process.env.DATABASE_URL,
                     "useUnifiedTopology": true,
-                    "entities": ["../models/**/*.{ts,js}"],
-                    "migrations": ["../migration/**/*.{ts,js}"],
-                    "subscribers": ["../subscriber/**/*.{ts,js}"],
+                    "entities": [__dirname + "../models/**/*.{ts,js}"],
+                    "migrations": [__dirname + "../migration/**/*.{ts,js}"],
+                    "subscribers": [__dirname + "../subscriber/**/*.{ts,js}"],
                     "cli": {
                         "entitiesDir": "src/entity",
                         "migrationsDir": "src/migration",

@@ -1,7 +1,7 @@
 import { Entity, Column, ObjectIdColumn, ObjectID, BaseEntity } from "typeorm";
 import { ObjectType, Field, InputType } from "type-graphql";
 
-@Entity()
+@Entity("Page")
 @ObjectType()
 @InputType("PageInput")
 export class Page extends BaseEntity {

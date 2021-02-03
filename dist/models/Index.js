@@ -35,7 +35,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Index.prototype, "page", void 0);
 Index = __decorate([
-    typeorm_1.Entity(),
+    typeorm_1.Entity("Index"),
     type_graphql_1.ObjectType(),
     type_graphql_1.InputType("IndexInput")
 ], Index);

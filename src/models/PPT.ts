@@ -1,7 +1,7 @@
 import { Entity, BaseEntity, PrimaryColumn } from "typeorm";
 import { ObjectType, Field, InputType } from "type-graphql";
 
-@Entity()
+@Entity("Entity")
 @ObjectType()
 @InputType("EntityInput")
 export class PPT extends BaseEntity {
