@@ -58,7 +58,6 @@ let EntryResolver = class EntryResolver {
     }
     entriesByDate(date, max) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(date.month, date.day, date.year);
             return yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
                 take: max,
                 where: {
@@ -84,14 +83,12 @@ let EntryResolver = class EntryResolver {
     }
     entriesByBook(book, max) {
         return __awaiter(this, void 0, void 0, function* () {
-            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
+            return yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
                 take: max,
                 where: {
                     book: book
                 }
             });
-            entries.forEach(entry => console.log(utils_1.findLeastDate(entry.dates)));
-            return entries;
         });
     }
     updateEntry(id, entry) {

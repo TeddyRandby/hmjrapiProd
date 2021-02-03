@@ -30,7 +30,7 @@ __decorate([
     __metadata("design:type", Array)
 ], Page.prototype, "entries", void 0);
 Page = __decorate([
-    typeorm_1.Entity("Page"),
+    typeorm_1.Entity(),
     type_graphql_1.ObjectType(),
     type_graphql_1.InputType("PageInput")
 ], Page);

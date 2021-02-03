@@ -3,6 +3,7 @@ import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 import { EntryResolver } from "../resolvers/EntryResolver"; // add this
 import {createConnection, ConnectionOptions } from "typeorm";
+import {config} from "dotenv"
 const boxClient = require("./Box");
 
 export function launch(): Promise<String> {
@@ -10,6 +11,8 @@ export function launch(): Promise<String> {
     try {
 
       console.log(__dirname)
+
+      config();
       
       let connectionOptions:ConnectionOptions = {
         "type": "mongodb",
@@ -17,9 +20,9 @@ export function launch(): Promise<String> {
         "logging": false,
         "url": process.env.DATABASE_URL,
         "useUnifiedTopology": true,
-        "entities": [__dirname + "../models/**/*.{ts,js}"],
-        "migrations": [__dirname + "../migration/**/*.{ts,js}"],
-        "subscribers": [__dirname + "../subscriber/**/*.{ts,js}"],
+        "entities": [process.env.NODE_ENV =="dev" ? "src/models/**/*.ts":"dist/models/**/*.js"],
+        "migrations": [__dirname + "../migration/**/*{.ts,.js}"],
+        "subscribers": [__dirname + "../subscriber/**/*{.ts,.js}"],
         "cli": {
           "entitiesDir": "src/entity",
           "migrationsDir": "src/migration",
@@ -34,7 +37,7 @@ export function launch(): Promise<String> {
       }).catch(reject);
       if (schema !== undefined) {
         const server = new ApolloServer({ schema });
-        await server.listen(process.env.PORT || 4000);
+        await server.listen(process.env.PORT);
         resolve("Server has launched!");
       }
     } catch (err) {

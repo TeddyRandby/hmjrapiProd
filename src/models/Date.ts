@@ -1,7 +1,7 @@
 import { Entity, BaseEntity, Column, PrimaryColumn } from "typeorm";
 import { ObjectType, Field, InputType } from "type-graphql";
 
-@Entity("Date")
+@Entity()
 @ObjectType()
 @InputType("DateInput")
 export class Date extends BaseEntity {

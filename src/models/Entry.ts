@@ -5,7 +5,7 @@ import { PPT } from "../models/PPT";
 import { ObjectType, Field, InputType } from "type-graphql";
 import { Page } from "./Page";
 
-@Entity("Entry")
+@Entity()
 @ObjectType()
 @InputType("EntryInput")
 export class Entry extends BaseEntity {

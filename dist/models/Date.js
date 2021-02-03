@@ -40,7 +40,7 @@ __decorate([
     __metadata("design:type", String)
 ], Date.prototype, "content", void 0);
 Date = __decorate([
-    typeorm_1.Entity("Date"),
+    typeorm_1.Entity(),
     type_graphql_1.ObjectType(),
     type_graphql_1.InputType("DateInput")
 ], Date);

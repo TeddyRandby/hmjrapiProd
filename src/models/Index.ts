@@ -1,7 +1,7 @@
 import { Entity, Column, BaseEntity, PrimaryColumn } from "typeorm";
 import { ObjectType, Field, InputType } from "type-graphql";
 
-@Entity("Index")
+@Entity()
 @ObjectType()
 @InputType("IndexInput")
 export class Index extends BaseEntity {

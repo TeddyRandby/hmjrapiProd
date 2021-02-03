@@ -15,21 +15,23 @@ const apollo_server_1 = require("apollo-server");
 const type_graphql_1 = require("type-graphql");
 const EntryResolver_1 = require("../resolvers/EntryResolver");
 const typeorm_1 = require("typeorm");
+const dotenv_1 = require("dotenv");
 const boxClient = require("./Box");
 function launch() {
     return new Promise(function (resolve, reject) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 console.log(__dirname);
+                dotenv_1.config();
                 let connectionOptions = {
                     "type": "mongodb",
                     "database": "test",
                     "logging": false,
                     "url": process.env.DATABASE_URL,
                     "useUnifiedTopology": true,
-                    "entities": [__dirname + "../models/**/*.{ts,js}"],
-                    "migrations": [__dirname + "../migration/**/*.{ts,js}"],
-                    "subscribers": [__dirname + "../subscriber/**/*.{ts,js}"],
+                    "entities": [process.env.NODE_ENV == "dev" ? "src/models/**/*.ts" : "dist/models/**/*.js"],
+                    "migrations": [__dirname + "../migration/**/*{.ts,.js}"],
+                    "subscribers": [__dirname + "../subscriber/**/*{.ts,.js}"],
                     "cli": {
                         "entitiesDir": "src/entity",
                         "migrationsDir": "src/migration",
@@ -43,7 +45,7 @@ function launch() {
                 }).catch(reject);
                 if (schema !== undefined) {
                     const server = new apollo_server_1.ApolloServer({ schema });
-                    yield server.listen(process.env.PORT || 4000);
+                    yield server.listen(process.env.PORT);
                     resolve("Server has launched!");
                 }
             }

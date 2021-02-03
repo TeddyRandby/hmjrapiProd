@@ -47,7 +47,6 @@ export class EntryResolver {
   // Grab entries within a certain date. TODO: Date range.
   @Query(() => [Entry])
   async entriesByDate(@Arg("date") date: Date, @Arg("max") max: number) {
-    console.log(date.month, date.day, date.year)
     return await getMongoRepository(Entry).find({
       take: max,
       where: {
@@ -73,14 +72,12 @@ export class EntryResolver {
 
   @Query(() => [Entry])
   async entriesByBook(@Arg("book") book: string, @Arg("max") max: number) {
-    let entries = await getMongoRepository(Entry).find({
+    return await getMongoRepository(Entry).find({
       take: max,
       where: {
         book: book 
       }
     });
-    entries.forEach(entry=>console.log(findLeastDate(entry.dates)))
-    return entries;
   }
 
   /* ------ Mutations ------ */
