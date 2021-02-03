@@ -16,7 +16,7 @@ export function launch(): Promise<String> {
       }).catch(reject);
       if (schema !== undefined) {
         const server = new ApolloServer({ schema });
-        await server.listen(4000);
+        await server.listen(process.env.PORT || 4000);
         resolve("Server has launched!");
       }
     } catch (err) {

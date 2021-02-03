@@ -28,7 +28,7 @@ function launch() {
                 }).catch(reject);
                 if (schema !== undefined) {
                     const server = new apollo_server_1.ApolloServer({ schema });
-                    yield server.listen(4000);
+                    yield server.listen(process.env.PORT || 4000);
                     resolve("Server has launched!");
                 }
             }
