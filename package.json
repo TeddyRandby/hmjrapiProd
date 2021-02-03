@@ -25,8 +25,8 @@
     "typeorm": "^0.2.28"
   },
   "scripts": {
-    "test": "set NODE_ENV=development&&jest",
-    "test-server": "set NODE_ENV=development&&set BOXFOLDER=116482128954&&nodemon --exec ts-node src/index.ts",
-    "start": "set NODE_ENV=production&&SET BOXFOLDER=116482128954&&nodemon --exec ts-node src/index.ts"
+    "test": "jest",
+    "test-server": "odemon --exec ts-node src/index.ts",
+    "start": "nodemon --exec ts-node src/index.ts"
   }
 }
