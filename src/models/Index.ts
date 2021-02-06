@@ -13,7 +13,7 @@ export class Index extends BaseEntity {
   @PrimaryColumn()
   stringified: string;
 
-  @Field(() => Number)
+  @Field(() => Number, {nullable: true})
   @Column()
   book: number;
 
