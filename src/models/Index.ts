@@ -9,15 +9,14 @@ export class Index extends BaseEntity {
   @PrimaryColumn()
   content: string;
 
-  @Field(() => String, { nullable: true })
   @PrimaryColumn()
   stringified: string;
 
-  @Field(() => Number, {nullable: true})
+  @Field(() => String, {nullable: true})
   @Column()
-  book: number;
+  book: string;
 
-  @Field(() => Number, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column()
-  page: number;
+  page: string;
 }
