@@ -40,7 +40,7 @@ let EntryResolver = class EntryResolver {
                     boxID: { $eq: id }
                 }
             });
-            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { stringified: index.page.toString() }))) })));
+            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: entry.book, stringified: index.page.toString() }))) })));
         });
     }
     entriesByKeyword(data, max) {
@@ -83,12 +83,13 @@ let EntryResolver = class EntryResolver {
     }
     entriesByBook(book, max) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
+            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
                 take: max,
                 where: {
                     book: book
                 }
             });
+            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { page: index.page.toString(), stringified: index.page.toString() }))) })));
         });
     }
     updateEntry(id, entry) {

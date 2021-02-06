@@ -20,19 +20,18 @@ __decorate([
     __metadata("design:type", String)
 ], Index.prototype, "content", void 0);
 __decorate([
-    type_graphql_1.Field(() => String, { nullable: true }),
     typeorm_1.PrimaryColumn(),
     __metadata("design:type", String)
 ], Index.prototype, "stringified", void 0);
 __decorate([
-    type_graphql_1.Field(() => Number),
+    type_graphql_1.Field(() => String, { nullable: true }),
     typeorm_1.Column(),
-    __metadata("design:type", Number)
+    __metadata("design:type", String)
 ], Index.prototype, "book", void 0);
 __decorate([
-    type_graphql_1.Field(() => Number, { nullable: true }),
+    type_graphql_1.Field(() => String, { nullable: true }),
     typeorm_1.Column(),
-    __metadata("design:type", Number)
+    __metadata("design:type", String)
 ], Index.prototype, "page", void 0);
 Index = __decorate([
     typeorm_1.Entity(),
