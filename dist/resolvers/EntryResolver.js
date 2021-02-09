@@ -94,7 +94,7 @@ let EntryResolver = class EntryResolver {
     }
     createEntry(book) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield typeorm_1.getMongoRepository(Entry_1.Entry).create({ book }).save();
+            return yield typeorm_1.getMongoRepository(Entry_1.Entry).create({ book, header: "", content: "", dates: [], indexes: [] }).save();
         });
     }
     deleteEntry(id) {

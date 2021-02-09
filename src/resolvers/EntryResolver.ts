@@ -93,7 +93,7 @@ export class EntryResolver {
   }
 
   /*
-   * Delete an entry and return the delted entry
+   * Delete an entry and return the deleted entry
    */
   @Mutation(() => Boolean)
   async deleteEntry(@Arg("id") id: string) {
