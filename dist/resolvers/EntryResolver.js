@@ -92,9 +92,9 @@ let EntryResolver = class EntryResolver {
             return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { page: index.page.toString(), stringified: index.page.toString() }))) })));
         });
     }
-    createEntry() {
+    createEntry(book) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield typeorm_1.getMongoRepository(Entry_1.Entry).create().save();
+            return yield typeorm_1.getMongoRepository(Entry_1.Entry).create({ book }).save();
         });
     }
     deleteEntry(id) {
@@ -183,8 +183,9 @@ __decorate([
 ], EntryResolver.prototype, "entriesByBook", null);
 __decorate([
     type_graphql_1.Mutation(() => Entry_1.Entry),
+    __param(0, type_graphql_1.Arg("book")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "createEntry", null);
 __decorate([

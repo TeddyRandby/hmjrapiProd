@@ -88,8 +88,8 @@ export class EntryResolver {
    * Create a new, blank entry and return it.
    */
   @Mutation(() => Entry)
-  async createEntry() {
-    return await getMongoRepository(Entry).create().save();
+  async createEntry(@Arg("book") book: string) {
+    return await getMongoRepository(Entry).create({book, header: "", content: "", dates: [], indexes: []}).save();
   }
 
   /*

@@ -14,35 +14,34 @@ export class Entry extends BaseEntity {
   _id: ObjectID;
 
   @Field(() => String, { nullable: true })
-  @Column()
+  @Column({default: ""})
   boxID: string;
 
   @Field(() => Page, { nullable: true })
-  @Column()
-  page: Page;
+  @Column() page: Page;
 
   @Field(() => String, { nullable: true })
-  @Column()
+  @Column({default: ""})
   book: string;
 
   @Field(() => String, { nullable: true })
-  @Column()
+  @Column({default: ""})
   header: string;
 
   @Field(() => String, { nullable: true })
-  @Column()
+  @Column({default: ""})
   content: string;
 
   @Field(() => [Date], { nullable: true })
-  @Column()
+  @Column({default: []})
   dates: Date[];
 
   @Field(() => [Index], { nullable: true })
-  @Column()
+  @Column({default: []})
   indexes: Index[];
 
   @Field(() => [PPT], { nullable: true })
-  @Column()
+  @Column({default: []})
   entities: PPT[];
 
   @Field(() => Date, { nullable: true })

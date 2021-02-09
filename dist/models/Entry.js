@@ -25,7 +25,7 @@ __decorate([
 ], Entry.prototype, "_id", void 0);
 __decorate([
     type_graphql_1.Field(() => String, { nullable: true }),
-    typeorm_1.Column(),
+    typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Entry.prototype, "boxID", void 0);
 __decorate([
@@ -35,32 +35,32 @@ __decorate([
 ], Entry.prototype, "page", void 0);
 __decorate([
     type_graphql_1.Field(() => String, { nullable: true }),
-    typeorm_1.Column(),
+    typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Entry.prototype, "book", void 0);
 __decorate([
     type_graphql_1.Field(() => String, { nullable: true }),
-    typeorm_1.Column(),
+    typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Entry.prototype, "header", void 0);
 __decorate([
     type_graphql_1.Field(() => String, { nullable: true }),
-    typeorm_1.Column(),
+    typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Entry.prototype, "content", void 0);
 __decorate([
     type_graphql_1.Field(() => [Date_1.Date], { nullable: true }),
-    typeorm_1.Column(),
+    typeorm_1.Column({ default: [] }),
     __metadata("design:type", Array)
 ], Entry.prototype, "dates", void 0);
 __decorate([
     type_graphql_1.Field(() => [Index_1.Index], { nullable: true }),
-    typeorm_1.Column(),
+    typeorm_1.Column({ default: [] }),
     __metadata("design:type", Array)
 ], Entry.prototype, "indexes", void 0);
 __decorate([
     type_graphql_1.Field(() => [PPT_1.PPT], { nullable: true }),
-    typeorm_1.Column(),
+    typeorm_1.Column({ default: [] }),
     __metadata("design:type", Array)
 ], Entry.prototype, "entities", void 0);
 __decorate([
