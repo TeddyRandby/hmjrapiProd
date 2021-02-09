@@ -99,12 +99,8 @@ let EntryResolver = class EntryResolver {
     }
     deleteEntry(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield typeorm_1.getMongoRepository(Entry_1.Entry).findOneAndDelete({
-                where: {
-                    "_id": id
-                }
-            });
-            return result.ok;
+            const result = yield typeorm_1.getMongoRepository(Entry_1.Entry).delete(id);
+            return result.affected || 0;
         });
     }
     updateEntry(id, entry) {
@@ -189,7 +185,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "createEntry", null);
 __decorate([
-    type_graphql_1.Mutation(() => Boolean),
+    type_graphql_1.Mutation(() => Number),
     __param(0, type_graphql_1.Arg("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

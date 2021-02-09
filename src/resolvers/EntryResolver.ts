@@ -93,17 +93,13 @@ export class EntryResolver {
   }
 
   /*
-   * Delete an entry and return the deleted entry
+   * Delete an entry and return the number of deleted entries
+   * For some reason this returns an empty object. dk why.
    */
-  @Mutation(() => Boolean)
+  @Mutation(() => Number)
   async deleteEntry(@Arg("id") id: string) {
-    const result = await getMongoRepository(Entry).findOneAndDelete({
-      where: {
-        "_id": id
-      }
-    })
-
-    return result.ok
+    const result = await getMongoRepository(Entry).delete(id);
+    return result.affected || 0;
   }
 
   /*
