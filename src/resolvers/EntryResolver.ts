@@ -85,6 +85,28 @@ export class EntryResolver {
   /* ------ Mutations ------ */
 
   /*
+   * Create a new, blank entry and return it.
+   */
+  @Mutation(() => Entry)
+  async createEntry() {
+    return await getMongoRepository(Entry).create().save();
+  }
+
+  /*
+   * Delete an entry and return the delted entry
+   */
+  @Mutation(() => Boolean)
+  async deleteEntry(@Arg("id") id: string) {
+    const result = await getMongoRepository(Entry).findOneAndDelete({
+      where: {
+        "_id": id
+      }
+    })
+
+    return result.ok
+  }
+
+  /*
    * Update a single entry
    */
   @Mutation(() => Entry)

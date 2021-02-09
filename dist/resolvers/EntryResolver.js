@@ -92,6 +92,21 @@ let EntryResolver = class EntryResolver {
             return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { page: index.page.toString(), stringified: index.page.toString() }))) })));
         });
     }
+    createEntry() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield typeorm_1.getMongoRepository(Entry_1.Entry).create().save();
+        });
+    }
+    deleteEntry(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield typeorm_1.getMongoRepository(Entry_1.Entry).findOneAndDelete({
+                where: {
+                    "_id": id
+                }
+            });
+            return result.ok;
+        });
+    }
     updateEntry(id, entry) {
         return __awaiter(this, void 0, void 0, function* () {
             let original = yield typeorm_1.getMongoRepository(Entry_1.Entry).findOne(id);
@@ -166,6 +181,19 @@ __decorate([
     __metadata("design:paramtypes", [String, Number]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "entriesByBook", null);
+__decorate([
+    type_graphql_1.Mutation(() => Entry_1.Entry),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EntryResolver.prototype, "createEntry", null);
+__decorate([
+    type_graphql_1.Mutation(() => Boolean),
+    __param(0, type_graphql_1.Arg("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EntryResolver.prototype, "deleteEntry", null);
 __decorate([
     type_graphql_1.Mutation(() => Entry_1.Entry),
     __param(0, type_graphql_1.Arg("id")), __param(1, type_graphql_1.Arg("entry")),
