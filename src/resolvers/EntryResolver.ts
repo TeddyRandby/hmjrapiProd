@@ -30,15 +30,15 @@ export class EntryResolver {
   // Grab entries with a certain keyword present. TODO: Multiple keywords.
   @Query(() => [Entry])
   async entriesByKeyword(
-    @Arg("keyword") data: string,
+    @Arg("keyword",()=>[String]) keywords: [string],
     @Arg("max") max: number
   ) {
     return await getMongoRepository(Entry).find({
       take: max,
       where: {
         $or: [
-          { header: { $regex: new RegExp(data) } },
-          { content: { $regex: new RegExp(data) } },
+          { header: { $regex: new RegExp(keywords.join('|')) } },
+          { content: { $regex: new RegExp(keywords.join('|')) } },
         ],
       },
     });
@@ -71,11 +71,11 @@ export class EntryResolver {
   }
 
   @Query(() => [Entry])
-  async entriesByBook(@Arg("book") book: string, @Arg("max") max: number) {
+  async entriesByBook(@Arg("book",()=>[String]) books: [string], @Arg("max") max: number) {
     let entries = await getMongoRepository(Entry).find({
       take: max,
       where: {
-        book: book 
+        book: { $regex: new RegExp(books.join('|'))}
       }
     });
 

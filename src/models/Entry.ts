@@ -3,7 +3,6 @@ import { Date } from "../models/Date";
 import { Index } from "../models/Index";
 import { PPT } from "../models/PPT";
 import { ObjectType, Field, InputType } from "type-graphql";
-import { Page } from "./Page";
 
 @Entity()
 @ObjectType()
@@ -16,9 +15,6 @@ export class Entry extends BaseEntity {
   @Field(() => String, { nullable: true })
   @Column({default: ""})
   boxID: string;
-
-  @Field(() => Page, { nullable: true })
-  @Column() page: Page;
 
   @Field(() => String, { nullable: true })
   @Column({default: ""})

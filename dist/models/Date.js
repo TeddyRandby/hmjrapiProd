@@ -15,17 +15,17 @@ const type_graphql_1 = require("type-graphql");
 let Date = class Date extends typeorm_1.BaseEntity {
 };
 __decorate([
-    type_graphql_1.Field(() => Number),
+    type_graphql_1.Field(() => Number, { nullable: true }),
     typeorm_1.Column(),
     __metadata("design:type", Number)
 ], Date.prototype, "day", void 0);
 __decorate([
-    type_graphql_1.Field(() => Number),
+    type_graphql_1.Field(() => Number, { nullable: true }),
     typeorm_1.Column(),
     __metadata("design:type", Number)
 ], Date.prototype, "month", void 0);
 __decorate([
-    type_graphql_1.Field(() => Number),
+    type_graphql_1.Field(() => Number, { nullable: true }),
     typeorm_1.Column(),
     __metadata("design:type", Number)
 ], Date.prototype, "year", void 0);

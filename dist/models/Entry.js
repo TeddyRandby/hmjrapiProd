@@ -15,7 +15,6 @@ const Date_1 = require("../models/Date");
 const Index_1 = require("../models/Index");
 const PPT_1 = require("../models/PPT");
 const type_graphql_1 = require("type-graphql");
-const Page_1 = require("./Page");
 let Entry = class Entry extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -28,11 +27,6 @@ __decorate([
     typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Entry.prototype, "boxID", void 0);
-__decorate([
-    type_graphql_1.Field(() => Page_1.Page, { nullable: true }),
-    typeorm_1.Column(),
-    __metadata("design:type", Page_1.Page)
-], Entry.prototype, "page", void 0);
 __decorate([
     type_graphql_1.Field(() => String, { nullable: true }),
     typeorm_1.Column({ default: "" }),

@@ -43,14 +43,14 @@ let EntryResolver = class EntryResolver {
             return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: entry.book, stringified: index.page.toString() }))) })));
         });
     }
-    entriesByKeyword(data, max) {
+    entriesByKeyword(keywords, max) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
                 take: max,
                 where: {
                     $or: [
-                        { header: { $regex: new RegExp(data) } },
-                        { content: { $regex: new RegExp(data) } },
+                        { header: { $regex: new RegExp(keywords.join('|')) } },
+                        { content: { $regex: new RegExp(keywords.join('|')) } },
                     ],
                 },
             });
@@ -81,12 +81,12 @@ let EntryResolver = class EntryResolver {
             });
         });
     }
-    entriesByBook(book, max) {
+    entriesByBook(books, max) {
         return __awaiter(this, void 0, void 0, function* () {
             let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
                 take: max,
                 where: {
-                    book: book
+                    book: { $regex: new RegExp(books.join('|')) }
                 }
             });
             return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { page: index.page.toString(), stringified: index.page.toString() }))) })));
@@ -157,10 +157,10 @@ __decorate([
 ], EntryResolver.prototype, "entriesByBoxID", null);
 __decorate([
     type_graphql_1.Query(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("keyword")),
+    __param(0, type_graphql_1.Arg("keyword", () => [String])),
     __param(1, type_graphql_1.Arg("max")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:paramtypes", [Array, Number]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "entriesByKeyword", null);
 __decorate([
@@ -172,9 +172,9 @@ __decorate([
 ], EntryResolver.prototype, "entriesByDate", null);
 __decorate([
     type_graphql_1.Query(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("book")), __param(1, type_graphql_1.Arg("max")),
+    __param(0, type_graphql_1.Arg("book", () => [String])), __param(1, type_graphql_1.Arg("max")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:paramtypes", [Array, Number]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "entriesByBook", null);
 __decorate([

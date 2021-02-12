@@ -5,15 +5,15 @@ import { ObjectType, Field, InputType } from "type-graphql";
 @ObjectType()
 @InputType("DateInput")
 export class Date extends BaseEntity {
-  @Field(() => Number)
+  @Field(() => Number, { nullable: true})
   @Column()
   day: number;
 
-  @Field(() => Number)
+  @Field(() => Number, { nullable: true})
   @Column()
   month: number;
 
-  @Field(() => Number)
+  @Field(() => Number, { nullable: true})
   @Column()
   year: number;
 
