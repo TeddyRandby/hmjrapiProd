@@ -2,7 +2,7 @@ import { Date } from "../models/Date";
 
 export function findLeastDate(dates: Date[]): Date | null {
   if (dates.length < 1) 
-    return null;
+    return null
   return dates.reduce((acc, curr)=>dateLessThanOrEqualTo(acc, curr) ? acc : curr)
 }
 

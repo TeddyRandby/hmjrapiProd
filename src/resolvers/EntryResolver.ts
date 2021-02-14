@@ -12,8 +12,50 @@ export class EntryResolver {
 
   // Grab entries indiscriminantly.
   @Query(() => [Entry])
-  async entries(@Arg("max") max: number,@Arg("offset") offset: number) {
-    return await getMongoRepository(Entry).find({ take: max, skip: offset });
+  async entries(@Arg("max") max: number,@Arg("keywords", ()=>[String]) keywords: string[], @Arg("dates", ()=> [Date]) dates: Date[], @Arg("books", ()=>[String]) books: string[]) {
+    const minDate = findLeastDate(dates) || {day: 100, month: 100, year: 100}
+    const maxDate = findGreatestDate(dates) || {day: 0, month: 0, year: 0}
+
+    return await getMongoRepository(Entry).find({
+      take: max,
+      where: {
+        $and: [
+          {
+            book: { $regex: new RegExp(books.join('|'))}
+          },
+          {
+            $or: [
+              { header: { $regex: new RegExp(keywords.join('|')) } },
+              { content: { $regex: new RegExp(keywords.join('|')) } },
+            ]
+          },
+          {
+            $or: [
+              {
+                $and: [
+                  { "minDate.day": { $lte: maxDate.day } },
+                  { "minDate.month": { $lte: maxDate.month } },
+                  { "minDate.year": { $lte: maxDate.year } },
+                  { "minDate.day": { $gte: minDate.day } },
+                  { "minDate.month": { $gte: minDate.month } },
+                  { "minDate.year": { $gte: minDate.year } },
+                ],
+              },
+              {
+                $and: [
+                  { "maxDate.day": { $lte: minDate.day } },
+                  { "maxDate.month": { $lte: minDate.month } },
+                  { "maxDate.year": { $lte: minDate.year } },
+                  { "maxDate.day": { $gte: maxDate.day } },
+                  { "maxDate.month": { $gte: maxDate.month } },
+                  { "maxDate.year": { $gte: maxDate.year } },
+                ],
+              },
+            ],
+          },
+        ]
+      }
+    })
   }
 
   // Quick fix for entries where Index wasn't parsed correctly.
