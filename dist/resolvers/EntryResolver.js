@@ -28,9 +28,50 @@ const Date_1 = require("../models/Date");
 const typeorm_1 = require("typeorm");
 const utils_1 = require("../utils/utils");
 let EntryResolver = class EntryResolver {
-    entries(max, offset) {
+    entries(max, keywords, dates, books) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield typeorm_1.getMongoRepository(Entry_1.Entry).find({ take: max, skip: offset });
+            const minDate = utils_1.findLeastDate(dates) || { day: 100, month: 100, year: 100 };
+            const maxDate = utils_1.findGreatestDate(dates) || { day: 0, month: 0, year: 0 };
+            return yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
+                take: max,
+                where: {
+                    $and: [
+                        {
+                            book: { $regex: new RegExp(books.join('|')) }
+                        },
+                        {
+                            $or: [
+                                { header: { $regex: new RegExp(keywords.join('|')) } },
+                                { content: { $regex: new RegExp(keywords.join('|')) } },
+                            ]
+                        },
+                        {
+                            $or: [
+                                {
+                                    $and: [
+                                        { "minDate.day": { $lte: maxDate.day } },
+                                        { "minDate.month": { $lte: maxDate.month } },
+                                        { "minDate.year": { $lte: maxDate.year } },
+                                        { "minDate.day": { $gte: minDate.day } },
+                                        { "minDate.month": { $gte: minDate.month } },
+                                        { "minDate.year": { $gte: minDate.year } },
+                                    ],
+                                },
+                                {
+                                    $and: [
+                                        { "maxDate.day": { $lte: minDate.day } },
+                                        { "maxDate.month": { $lte: minDate.month } },
+                                        { "maxDate.year": { $lte: minDate.year } },
+                                        { "maxDate.day": { $gte: maxDate.day } },
+                                        { "maxDate.month": { $gte: maxDate.month } },
+                                        { "maxDate.year": { $gte: maxDate.year } },
+                                    ],
+                                },
+                            ],
+                        },
+                    ]
+                }
+            });
         });
     }
     entriesByBoxID(id) {
@@ -143,9 +184,9 @@ let EntryResolver = class EntryResolver {
 };
 __decorate([
     type_graphql_1.Query(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("max")), __param(1, type_graphql_1.Arg("offset")),
+    __param(0, type_graphql_1.Arg("max")), __param(1, type_graphql_1.Arg("keywords", () => [String])), __param(2, type_graphql_1.Arg("dates", () => [Date_1.Date])), __param(3, type_graphql_1.Arg("books", () => [String])),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number]),
+    __metadata("design:paramtypes", [Number, Array, Array, Array]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "entries", null);
 __decorate([
