@@ -32,7 +32,7 @@ let EntryResolver = class EntryResolver {
         return __awaiter(this, void 0, void 0, function* () {
             const minDate = utils_1.findLeastDate(dates) || { day: 100, month: 100, year: 100 };
             const maxDate = utils_1.findGreatestDate(dates) || { day: 0, month: 0, year: 0 };
-            return yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
+            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
                 take: max,
                 where: {
                     $and: [
@@ -72,6 +72,7 @@ let EntryResolver = class EntryResolver {
                     ]
                 }
             });
+            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: entry.book, stringified: index.page.toString() }))) })));
         });
     }
     entriesByBoxID(id) {

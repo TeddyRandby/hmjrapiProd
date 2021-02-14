@@ -16,7 +16,7 @@ export class EntryResolver {
     const minDate = findLeastDate(dates) || {day: 100, month: 100, year: 100}
     const maxDate = findGreatestDate(dates) || {day: 0, month: 0, year: 0}
 
-    return await getMongoRepository(Entry).find({
+    let entries = await getMongoRepository(Entry).find({
       take: max,
       where: {
         $and: [
@@ -56,6 +56,8 @@ export class EntryResolver {
         ]
       }
     })
+
+    return entries.map(entry=>({...entry, indexes: entry.indexes.map(index=>({...index,book: entry.book, stringified: index.page.toString()}))}));
   }
 
   // Quick fix for entries where Index wasn't parsed correctly.
