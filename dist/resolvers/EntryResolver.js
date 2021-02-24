@@ -31,48 +31,69 @@ let EntryResolver = class EntryResolver {
     entries(max, keywords, dates, books) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            const minDate = (_a = utils_1.findLeastDate(dates)) !== null && _a !== void 0 ? _a : { day: 100, month: 100, year: 100 };
-            const maxDate = (_b = utils_1.findGreatestDate(dates)) !== null && _b !== void 0 ? _b : { day: 0, month: 0, year: 0 };
-            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
-                take: max,
-                where: {
-                    $and: [
-                        {
-                            book: { $regex: new RegExp(books.join('|') || /./g) }
-                        },
-                        {
-                            $or: [
-                                { header: { $regex: new RegExp(keywords.join('|') || /./g) } },
-                                { content: { $regex: new RegExp(keywords.join('|') || /./g) } },
-                            ]
-                        },
-                        {
-                            $or: [
-                                {
-                                    $and: [
-                                        { "minDate.day": { $lte: maxDate.day } },
-                                        { "minDate.month": { $lte: maxDate.month } },
-                                        { "minDate.year": { $lte: maxDate.year } },
-                                        { "minDate.day": { $gte: minDate.day } },
-                                        { "minDate.month": { $gte: minDate.month } },
-                                        { "minDate.year": { $gte: minDate.year } },
-                                    ],
-                                },
-                                {
-                                    $and: [
-                                        { "maxDate.day": { $lte: minDate.day } },
-                                        { "maxDate.month": { $lte: minDate.month } },
-                                        { "maxDate.year": { $lte: minDate.year } },
-                                        { "maxDate.day": { $gte: maxDate.day } },
-                                        { "maxDate.month": { $gte: maxDate.month } },
-                                        { "maxDate.year": { $gte: maxDate.year } },
-                                    ],
-                                },
-                            ],
-                        },
-                    ]
-                }
-            });
+            let entries;
+            if (dates.length > 0) {
+                const minDate = (_a = utils_1.findLeastDate(dates)) !== null && _a !== void 0 ? _a : { day: 100, month: 100, year: 100 };
+                const maxDate = (_b = utils_1.findGreatestDate(dates)) !== null && _b !== void 0 ? _b : { day: 0, month: 0, year: 0 };
+                entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
+                    take: max,
+                    where: {
+                        $and: [
+                            {
+                                book: { $regex: new RegExp(books.join('|') || /./g) }
+                            },
+                            {
+                                $or: [
+                                    { header: { $regex: new RegExp(keywords.join('|') || /./g) } },
+                                    { content: { $regex: new RegExp(keywords.join('|') || /./g) } },
+                                ]
+                            },
+                            {
+                                $or: [
+                                    {
+                                        $and: [
+                                            { "minDate.day": { $lte: maxDate.day } },
+                                            { "minDate.month": { $lte: maxDate.month } },
+                                            { "minDate.year": { $lte: maxDate.year } },
+                                            { "minDate.day": { $gte: minDate.day } },
+                                            { "minDate.month": { $gte: minDate.month } },
+                                            { "minDate.year": { $gte: minDate.year } },
+                                        ],
+                                    },
+                                    {
+                                        $and: [
+                                            { "maxDate.day": { $lte: minDate.day } },
+                                            { "maxDate.month": { $lte: minDate.month } },
+                                            { "maxDate.year": { $lte: minDate.year } },
+                                            { "maxDate.day": { $gte: maxDate.day } },
+                                            { "maxDate.month": { $gte: maxDate.month } },
+                                            { "maxDate.year": { $gte: maxDate.year } },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ]
+                    }
+                });
+            }
+            else {
+                entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
+                    take: max,
+                    where: {
+                        $and: [
+                            {
+                                book: { $regex: new RegExp(books.join('|') || /./g) }
+                            },
+                            {
+                                $or: [
+                                    { header: { $regex: new RegExp(keywords.join('|') || /./g) } },
+                                    { content: { $regex: new RegExp(keywords.join('|') || /./g) } },
+                                ]
+                            },
+                        ]
+                    }
+                });
+            }
             return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: entry.book, stringified: index.page.toString() }))) })));
         });
     }
