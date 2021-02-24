@@ -13,20 +13,20 @@ export class EntryResolver {
   // Grab entries indiscriminantly.
   @Query(() => [Entry])
   async entries(@Arg("max") max: number,@Arg("keywords", ()=>[String]) keywords: string[], @Arg("dates", ()=> [Date]) dates: Date[], @Arg("books", ()=>[String]) books: string[]) {
-    const minDate = findLeastDate(dates) || {day: 100, month: 100, year: 100}
-    const maxDate = findGreatestDate(dates) || {day: 0, month: 0, year: 0}
+    const minDate = findLeastDate(dates) ?? {day: 100, month: 100, year: 100}
+    const maxDate = findGreatestDate(dates) ?? {day: 0, month: 0, year: 0}
 
     let entries = await getMongoRepository(Entry).find({
       take: max,
       where: {
         $and: [
           {
-            book: { $regex: new RegExp(books.join('|'))}
+            book: { $regex: new RegExp(books.join('|') || /./g)}
           },
           {
             $or: [
-              { header: { $regex: new RegExp(keywords.join('|')) } },
-              { content: { $regex: new RegExp(keywords.join('|')) } },
+              { header: { $regex: new RegExp(keywords.join('|') || /./g) } },
+              { content: { $regex: new RegExp(keywords.join('|') || /./g) } },
             ]
           },
           {
