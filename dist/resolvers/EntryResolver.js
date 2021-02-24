@@ -29,20 +29,21 @@ const typeorm_1 = require("typeorm");
 const utils_1 = require("../utils/utils");
 let EntryResolver = class EntryResolver {
     entries(max, keywords, dates, books) {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            const minDate = utils_1.findLeastDate(dates) || { day: 100, month: 100, year: 100 };
-            const maxDate = utils_1.findGreatestDate(dates) || { day: 0, month: 0, year: 0 };
+            const minDate = (_a = utils_1.findLeastDate(dates)) !== null && _a !== void 0 ? _a : { day: 100, month: 100, year: 100 };
+            const maxDate = (_b = utils_1.findGreatestDate(dates)) !== null && _b !== void 0 ? _b : { day: 0, month: 0, year: 0 };
             let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
                 take: max,
                 where: {
                     $and: [
                         {
-                            book: { $regex: new RegExp(books.join('|')) }
+                            book: { $regex: new RegExp(books.join('|') || /./g) }
                         },
                         {
                             $or: [
-                                { header: { $regex: new RegExp(keywords.join('|')) } },
-                                { content: { $regex: new RegExp(keywords.join('|')) } },
+                                { header: { $regex: new RegExp(keywords.join('|') || /./g) } },
+                                { content: { $regex: new RegExp(keywords.join('|') || /./g) } },
                             ]
                         },
                         {
