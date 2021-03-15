@@ -1,7 +1,6 @@
 import { Entity, BaseEntity, Column, ObjectIdColumn, ObjectID } from "typeorm";
 import { Date } from "../models/Date";
 import { Index } from "../models/Index";
-import { PPT } from "../models/PPT";
 import { ObjectType, Field, InputType } from "type-graphql";
 
 @Entity()
@@ -36,9 +35,17 @@ export class Entry extends BaseEntity {
   @Column({default: []})
   indexes: Index[];
 
-  @Field(() => [PPT], { nullable: true })
+  @Field(() => [String], { nullable: true })
   @Column({default: []})
-  entities: PPT[];
+  people: string[];
+
+  @Field(() => [String], { nullable: true })
+  @Column({default: []})
+  locations: string[];
+
+  @Field(() => [String], { nullable: true })
+  @Column({default: []})
+  organizations: string[];
 
   @Field(() => Date, { nullable: true })
   @Column()

@@ -202,6 +202,15 @@ export class EntryResolver {
     if (entry.indexes)
       original.indexes = entry.indexes;
 
+    if (entry.people)
+      original.people = entry.people;
+
+    if (entry.locations)
+      original.locations = entry.locations;
+
+    if (entry.organizations)
+      original.organizations = entry.organizations;
+
     await original.save();
 
     return original;
