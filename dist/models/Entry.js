@@ -13,7 +13,6 @@ exports.Entry = void 0;
 const typeorm_1 = require("typeorm");
 const Date_1 = require("../models/Date");
 const Index_1 = require("../models/Index");
-const PPT_1 = require("../models/PPT");
 const type_graphql_1 = require("type-graphql");
 let Entry = class Entry extends typeorm_1.BaseEntity {
 };
@@ -53,10 +52,20 @@ __decorate([
     __metadata("design:type", Array)
 ], Entry.prototype, "indexes", void 0);
 __decorate([
-    type_graphql_1.Field(() => [PPT_1.PPT], { nullable: true }),
+    type_graphql_1.Field(() => [String], { nullable: true }),
     typeorm_1.Column({ default: [] }),
     __metadata("design:type", Array)
-], Entry.prototype, "entities", void 0);
+], Entry.prototype, "people", void 0);
+__decorate([
+    type_graphql_1.Field(() => [String], { nullable: true }),
+    typeorm_1.Column({ default: [] }),
+    __metadata("design:type", Array)
+], Entry.prototype, "locations", void 0);
+__decorate([
+    type_graphql_1.Field(() => [String], { nullable: true }),
+    typeorm_1.Column({ default: [] }),
+    __metadata("design:type", Array)
+], Entry.prototype, "organizations", void 0);
 __decorate([
     type_graphql_1.Field(() => Date_1.Date, { nullable: true }),
     typeorm_1.Column(),
