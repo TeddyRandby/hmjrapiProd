@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Arg } from "type-graphql";
+import { Resolver, Query, /*Mutation,*/ Arg } from "type-graphql";
 import { Entry } from "../models/Entry";
 import { Date } from "../models/Date";
 import { getMongoRepository } from "typeorm";
@@ -149,91 +149,92 @@ export class EntryResolver {
   }
 
   /* ------ Mutations ------ */
+    // Comment out mutations. DB should be static now
 
   /*
    * Create a new, blank entry and return it.
    */
-  @Mutation(() => Entry)
-  async createEntry(@Arg("book") book: string) {
-    return await getMongoRepository(Entry).create({book, header: "", content: "", dates: [], indexes: []}).save();
-  }
+  // @Mutation(() => Entry)
+  // async createEntry(@Arg("book") book: string) {
+  //   return await getMongoRepository(Entry).create({book, header: "", content: "", dates: [], indexes: []}).save();
+  // }
 
   /*
    * Delete an entry and return the number of deleted entries
    * For some reason this returns an empty object. dk why.
    */
-  @Mutation(() => Number)
-  async deleteEntry(@Arg("id") id: string) {
-    const result = await getMongoRepository(Entry).delete(id);
-    return result.affected || 0;
-  }
+  // @Mutation(() => Number)
+  // async deleteEntry(@Arg("id") id: string) {
+  //   const result = await getMongoRepository(Entry).delete(id);
+  //   return result.affected || 0;
+  // }
 
   /*
    * Update a single entry
    */
-  @Mutation(() => Entry)
-  async updateEntry(@Arg("id") id: string, @Arg("entry") entry: Entry) {
-    let original = await getMongoRepository(Entry).findOne(id);
-
-    if (!original)
-      return original
-
-    if (entry.header)
-      original.header = entry.header;
-
-    if (entry.content)
-      original.content = entry.content;
-
-    if (entry.book)
-      original.book = entry.book;
-
-    if (entry.dates) {
-      original.dates = entry.dates;
-
-      let least = findLeastDate(entry.dates);
-      if (least)
-        original.minDate = least;
-
-      let greatest = findGreatestDate(entry.dates);
-      if (greatest)
-        original.maxDate = greatest;
-    }
-
-    if (entry.indexes)
-      original.indexes = entry.indexes;
-
-    if (entry.people)
-      original.people = entry.people;
-
-    if (entry.locations)
-      original.locations = entry.locations;
-
-    if (entry.organizations)
-      original.organizations = entry.organizations;
-
-    await original.save();
-
-    return original;
-  }
+//   @Mutation(() => Entry)
+//   async updateEntry(@Arg("id") id: string, @Arg("entry") entry: Entry) {
+//     let original = await getMongoRepository(Entry).findOne(id);
+// 
+//     if (!original)
+//       return original
+// 
+//     if (entry.header)
+//       original.header = entry.header;
+// 
+//     if (entry.content)
+//       original.content = entry.content;
+// 
+//     if (entry.book)
+//       original.book = entry.book;
+// 
+//     if (entry.dates) {
+//       original.dates = entry.dates;
+// 
+//       let least = findLeastDate(entry.dates);
+//       if (least)
+//         original.minDate = least;
+// 
+//       let greatest = findGreatestDate(entry.dates);
+//       if (greatest)
+//         original.maxDate = greatest;
+//     }
+// 
+//     if (entry.indexes)
+//       original.indexes = entry.indexes;
+// 
+//     if (entry.people)
+//       original.people = entry.people;
+// 
+//     if (entry.locations)
+//       original.locations = entry.locations;
+// 
+//     if (entry.organizations)
+//       original.organizations = entry.organizations;
+// 
+//     await original.save();
+// 
+//     return original;
+//   }
 
   /*
    * Update all entries associated with a certain boxID page
    */
-  @Mutation(() => [Entry])
-  async updatePage(@Arg("id") id: string, @Arg("entry") entry: Entry) {
-    //const replacement = await format(ent, boxID, boxName);
-    let original = await getMongoRepository(Entry).find({
-      where: {
-        boxID: id 
-      }
-    });
-
-    console.log(entry);
-
-    // Switch this to pulling the max and min dates out of dates. (Not Manual)
-
-    return original;
-
-    } 
+//   @Mutation(() => [Entry])
+//   async updatePage(@Arg("id") id: string, @Arg("entry") entry: Entry) {
+//     //const replacement = await format(ent, boxID, boxName);
+//     let original = await getMongoRepository(Entry).find({
+//       where: {
+//         boxID: id 
+//       }
+//     });
+// 
+//     console.log(entry);
+// 
+//     // Switch this to pulling the max and min dates out of dates. (Not Manual)
+// 
+//     return original;
+// 
+//     } 
   
 }
