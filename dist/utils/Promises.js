@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.makeEntrySubFolder = exports.getFileName = exports.getParentID = exports.uploadFile = exports.pipe = exports.fetchDownloadURL = exports.fetchReadStream = exports.readFile = exports.launch = void 0;
+exports.makeEntrySubFolder = exports.getFileName = exports.getParentID = exports.uploadFile = exports.pipe = exports.fetchDownloadURL = exports.fetchReadStream = exports.getVolumeDownloadURL = exports.readFile = exports.launch = void 0;
 const fs = require("fs");
 const apollo_server_1 = require("apollo-server");
 const type_graphql_1 = require("type-graphql");
@@ -21,7 +21,6 @@ function launch() {
     return new Promise(function (resolve, reject) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(__dirname);
                 dotenv_1.config();
                 let connectionOptions = {
                     "type": "mongodb",
@@ -67,6 +66,33 @@ function readFile(file) {
     });
 }
 exports.readFile = readFile;
+function getVolumeDownloadURL(vol) {
+    return new Promise((resolve, reject) => {
+        boxClient.default.folders.getItems('116338627657', { offset: parseInt(vol), limit: 4, fields: 'name, id' }).then((items) => {
+            if (!items)
+                reject("No volume");
+            let val = items.entries.filter((item) => (item.name == `V${vol}`));
+            if (!val || !val[0])
+                reject('No items with matching volume');
+            boxClient.default.folders.getItems(val[0].id, { fields: 'name, id' }).then((subitems) => {
+                if (!subitems)
+                    reject("Volume has No items");
+                let val = subitems.entries.filter((item) => (item.name == `Data`));
+                if (!val || !val[0])
+                    reject('No data in volume');
+                boxClient.default.folders.getItems(val[0].id, { fields: 'name, id' }).then((subsubitems) => {
+                    if (!subsubitems)
+                        reject("Volume Data has No items");
+                    let val = subsubitems.entries;
+                    if (!val || !val[0])
+                        reject('Volume data has no pdf');
+                    resolve(fetchDownloadURL(val[0].id));
+                });
+            });
+        });
+    });
+}
+exports.getVolumeDownloadURL = getVolumeDownloadURL;
 function fetchReadStream(boxFileID) {
     return new Promise(function (resolve, reject) {
         boxClient.default.files.getReadStream(boxFileID, null, function (error, stream) {

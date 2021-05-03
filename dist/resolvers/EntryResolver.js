@@ -27,6 +27,7 @@ const Entry_1 = require("../models/Entry");
 const Date_1 = require("../models/Date");
 const typeorm_1 = require("typeorm");
 const utils_1 = require("../utils/utils");
+const Promises_1 = require("../utils/Promises");
 let EntryResolver = class EntryResolver {
     entries(max, keywords, dates, books) {
         var _a, _b;
@@ -95,6 +96,11 @@ let EntryResolver = class EntryResolver {
                 });
             }
             return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: entry.book, stringified: index.page.toString() }))) })));
+        });
+    }
+    volume(vol) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield Promises_1.getVolumeDownloadURL(vol);
         });
     }
     entriesByBoxID(id) {
@@ -218,6 +224,13 @@ __decorate([
     __metadata("design:paramtypes", [Number, Array, Array, Array]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "entries", null);
+__decorate([
+    type_graphql_1.Query(() => String),
+    __param(0, type_graphql_1.Arg("volume")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EntryResolver.prototype, "volume", null);
 __decorate([
     type_graphql_1.Query(() => [Entry_1.Entry]),
     __param(0, type_graphql_1.Arg("id")),

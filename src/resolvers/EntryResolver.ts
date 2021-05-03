@@ -3,6 +3,7 @@ import { Entry } from "../models/Entry";
 import { Date } from "../models/Date";
 import { getMongoRepository } from "typeorm";
 import { findLeastDate, findGreatestDate } from "../utils/utils"
+import { getVolumeDownloadURL } from "../utils/Promises";
 
 @Resolver()
 export class EntryResolver {
@@ -81,6 +82,12 @@ export class EntryResolver {
 
     return entries.map(entry=>({...entry, indexes: entry.indexes.map(index=>({...index,book: entry.book, stringified: index.page.toString()}))}));
   }
+
+@Query(()=>String)
+ async volume(@Arg("volume") vol: string) {
+		return await getVolumeDownloadURL(vol);
+	}
+
 
   // Quick fix for entries where Index wasn't parsed correctly.
   @Query(() => [Entry])

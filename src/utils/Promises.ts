@@ -10,8 +10,6 @@ export function launch(): Promise<String> {
   return new Promise(async function (resolve, reject) {
     try {
 
-      console.log(__dirname)
-
       config();
       
       let connectionOptions:ConnectionOptions = {
@@ -55,6 +53,33 @@ export function readFile(file: string): Promise<Buffer> {
     })
 
   })
+}
+
+export function getVolumeDownloadURL(vol: string): Promise<any> {
+	return new Promise((resolve, reject) => {
+		boxClient.default.folders.getItems('116338627657', { offset: parseInt(vol), limit:4, fields: 'name, id'}).then((items:any)=>{
+			if(!items)
+				reject("No volume")
+			let val = items.entries.filter((item:any)=>(item.name == `V${vol}`));
+			if (!val || !val[0])
+				reject('No items with matching volume')
+			boxClient.default.folders.getItems(val[0].id, {fields: 'name, id'}).then((subitems:any)=>{
+				if(!subitems)
+					reject("Volume has No items")
+				let val = subitems.entries.filter((item:any)=>(item.name == `Data`));
+				if (!val || !val[0])
+					reject('No data in volume')
+				boxClient.default.folders.getItems(val[0].id, {fields: 'name, id'}).then((subsubitems:any)=>{
+					if(!subsubitems)
+						reject("Volume Data has No items")
+					let val = subsubitems.entries
+					if (!val || !val[0])
+						reject('Volume data has no pdf')
+					resolve(fetchDownloadURL(val[0].id))
+				})
+			})
+		})
+	})
 }
 
 // Fetch a file's read stream from BOX API.
