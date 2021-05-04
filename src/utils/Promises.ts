@@ -57,7 +57,7 @@ export function readFile(file: string): Promise<Buffer> {
 
 export function getVolumeDownloadURL(vol: string): Promise<any> {
 	return new Promise((resolve, reject) => {
-		boxClient.default.folders.getItems('116338627657', { offset: parseInt(vol), limit:200, fields: 'name, id'}).then((items:any)=>{
+		boxClient.default.folders.getItems('116338627657', { offset: 0, limit:900, fields: 'name, id'}).then((items:any)=>{
 			if(!items)
 				reject("No volume")
 			let val = items.entries.filter((item:any)=>(item.name == `V${vol}`));
