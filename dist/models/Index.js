@@ -29,9 +29,9 @@ __decorate([
     __metadata("design:type", String)
 ], Index.prototype, "book", void 0);
 __decorate([
-    type_graphql_1.Field(() => String, { nullable: true }),
+    type_graphql_1.Field(() => type_graphql_1.Float, { nullable: true }),
     typeorm_1.Column(),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], Index.prototype, "page", void 0);
 Index = __decorate([
     typeorm_1.Entity(),

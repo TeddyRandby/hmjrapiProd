@@ -1,5 +1,5 @@
 import { Entity, Column, BaseEntity, PrimaryColumn } from "typeorm";
-import { ObjectType, Field, InputType } from "type-graphql";
+import { ObjectType, Field, InputType, Float } from "type-graphql";
 
 @Entity()
 @ObjectType()
@@ -16,7 +16,7 @@ export class Index extends BaseEntity {
   @Column()
   book: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => Float, { nullable: true })
   @Column()
-  page: string;
+  page: number;
 }

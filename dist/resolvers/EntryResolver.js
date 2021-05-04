@@ -95,7 +95,8 @@ let EntryResolver = class EntryResolver {
                     }
                 });
             }
-            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: entry.book, stringified: index.page.toString() }))) })));
+            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes
+                    .map(index => (Object.assign(Object.assign({}, index), { book: entry.book, page: isNaN(index.page) ? 1 : index.page }))) })));
         });
     }
     volume(vol) {
