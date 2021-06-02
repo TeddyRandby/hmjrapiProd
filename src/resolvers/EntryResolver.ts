@@ -158,7 +158,13 @@ export class EntryResolver {
       }
     });
 
-    return entries.map(entry=>({...entry, indexes: entry.indexes.map(index=>({...index,page: index.page.toString(), stringified: index.page.toString()}))}));
+    return entries.map(entry=>({...entry, indexes: entry.indexes
+			.map(index =>
+				({...index,
+					book: entry.book,
+					page: isNaN(index.page)? 1 : index.page})
+			)})
+		);
   }
 
   /* ------ Mutations ------ */

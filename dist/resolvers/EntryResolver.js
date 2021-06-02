@@ -160,7 +160,8 @@ let EntryResolver = class EntryResolver {
                     book: { $regex: new RegExp(books.join('|')) }
                 }
             });
-            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { page: index.page.toString(), stringified: index.page.toString() }))) })));
+            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes
+                    .map(index => (Object.assign(Object.assign({}, index), { book: entry.book, page: isNaN(index.page) ? 1 : index.page }))) })));
         });
     }
     createEntry(book) {
