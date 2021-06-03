@@ -5,6 +5,7 @@ Some context about the collection here.
 The API uses graphql, so there is only one endpoint:
 ```https://hmjrapi-prod.herokuapp.com```
 
+
 There is one query for retrieving entries, fittingly called 'entries'.
 It has 4 arguments: 
 ```
@@ -24,6 +25,38 @@ inteface DateInput {
   year: number // Two digits corresponding to a year in the 20th century, ie 43 -> 1943
 }
 ```
+GraphQL stands for graph query language - so querying this API requires learning a bit of a new language.
+
+To query, send a POST request to the endpoint with a JSON body that looks like this:
+```
+{
+  query: foo // GQL query string here
+  variables: bar // An object containing values for variables referenced in your query string.
+}
+```
+
+In python, defining a query string might look like this:
+```
+"""
+query ($max: Float!, $keywords: [String!]!, $dates: [DateInput!]!, $books: [String!]!) {
+                entries(max: $max, keywords: $keywords, dates: $dates, books:$books) {
+                    header
+                    content
+                }
+            }
+"""
+```
+This query string is written in GQL, and vaguely resembles a function call.
+Words prefixed with a $ are variables. That variable object should look like this:
+```
+{
+  max: 5,
+  keywords: ["refugee"],
+  dates: [],
+  books: []
+}
+```
+The values of this object are just examples, although keywords, dates and books must be arrays (even if empty).
 
 The server will respond with an array of entries fitting the query.
 ```
