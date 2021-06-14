@@ -86,7 +86,8 @@ export class EntryResolver {
                 indexes: entry.indexes.map(index => (
                     {
                         ...index,
-					    book: index.book ? index.book : entry.book
+					    book: index.book ? index.book : entry.book,
+                        page: isNaN(parseInt(index.page)) ? "NaN" : index.page
 			        }
                 ))
             }
@@ -168,7 +169,8 @@ export class EntryResolver {
                 indexes: entry.indexes.map(index => (
                     {
                         ...index,
-					    book: index.book ? index.book : entry.book
+					    book: index.book ? index.book : entry.book,
+                        page: isNaN(parseInt(index.page)) ? "NaN" : index.page
 			        }
                 ))
             }

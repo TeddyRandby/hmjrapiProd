@@ -95,7 +95,7 @@ let EntryResolver = class EntryResolver {
                     }
                 });
             }
-            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: index.book ? index.book : entry.book }))) })));
+            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: index.book ? index.book : entry.book, page: isNaN(parseInt(index.page)) ? "NaN" : index.page }))) })));
         });
     }
     volume(vol) {
@@ -159,7 +159,7 @@ let EntryResolver = class EntryResolver {
                     book: { $regex: new RegExp(books.join('|')) }
                 }
             });
-            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: index.book ? index.book : entry.book }))) })));
+            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: index.book ? index.book : entry.book, page: isNaN(parseInt(index.page)) ? "NaN" : index.page }))) })));
         });
     }
     createEntry(book) {
