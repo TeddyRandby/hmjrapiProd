@@ -87,7 +87,7 @@ export class EntryResolver {
                     {
                         ...index,
 					    book: index.book ? index.book : entry.book,
-                        page: isNaN(parseInt(index.page)) ? "NaN" : index.page
+                        page: index.page ? index.page : "NaN"
 			        }
                 ))
             }
@@ -170,7 +170,7 @@ export class EntryResolver {
                     {
                         ...index,
 					    book: index.book ? index.book : entry.book,
-                        page: isNaN(parseInt(index.page)) ? "NaN" : index.page
+                        page: index.page ? index.page : "NaN"
 			        }
                 ))
             }
