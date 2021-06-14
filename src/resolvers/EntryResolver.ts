@@ -80,13 +80,17 @@ export class EntryResolver {
 
     }
 
-    return entries.map(entry=>({...entry, indexes: entry.indexes
-			.map(index =>
-				({...index,
-					book: entry.book,
-					page: isNaN(index.page)? 1 : index.page})
-			)})
-		);
+		return entries.map(entry=>(
+            {
+                ...entry,
+                indexes: entry.indexes.map(index => (
+                    {
+                        ...index,
+					    book: index.book ? index.book : entry.book
+			        }
+                ))
+            }
+        ));
   }
 
 @Query(()=>String)
@@ -158,13 +162,17 @@ export class EntryResolver {
       }
     });
 
-    return entries.map(entry=>({...entry, indexes: entry.indexes
-			.map(index =>
-				({...index,
-					// book: entry.book,
-					page: isNaN(index.page)? 1 : index.page})
-			)})
-		);
+		return entries.map(entry=>(
+            {
+                ...entry,
+                indexes: entry.indexes.map(index => (
+                    {
+                        ...index,
+					    book: index.book ? index.book : entry.book
+			        }
+                ))
+            }
+        ));
   }
 
   /* ------ Mutations ------ */
