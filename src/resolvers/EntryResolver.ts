@@ -161,7 +161,7 @@ export class EntryResolver {
     return entries.map(entry=>({...entry, indexes: entry.indexes
 			.map(index =>
 				({...index,
-					book: entry.book,
+					// book: entry.book,
 					page: isNaN(index.page)? 1 : index.page})
 			)})
 		);
