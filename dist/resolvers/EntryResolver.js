@@ -213,7 +213,8 @@ let EntryResolver = class EntryResolver {
 };
 __decorate([
     type_graphql_1.Query(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("max")), __param(1, type_graphql_1.Arg("clean")),
+    __param(0, type_graphql_1.Arg("max", { defaultValue: 50 })),
+    __param(1, type_graphql_1.Arg("clean", { defaultValue: false })),
     __param(2, type_graphql_1.Arg("keywords", () => [String])),
     __param(3, type_graphql_1.Arg("dates", () => [Date_1.Date])),
     __param(4, type_graphql_1.Arg("books", () => [String])),

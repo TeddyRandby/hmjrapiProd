@@ -15,7 +15,8 @@ EntryResolver {
   /* ------ Queries ------ */
 
   @Query(() => [Entry])
-  async entries(@Arg("max") max: number, @Arg("clean") clean: boolean,
+  async entries(@Arg("max", {defaultValue : 50}) max: number,
+                @Arg("clean", {defaultValue : false}) clean: boolean,
                 @Arg("keywords", () => [String]) keywords: string[],
                 @Arg("dates", () => [Date]) dates: Date[],
                 @Arg("books", () => [String]) books: string[]) {
