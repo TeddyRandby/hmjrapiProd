@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dateGreaterThanOrEqualTo = exports.dateLessThanOrEqualTo = exports.findGreatestDate = exports.findLeastDate = void 0;
+exports.findBooks = exports.dateGreaterThanOrEqualTo = exports.dateLessThanOrEqualTo = exports.findGreatestDate = exports.findLeastDate = void 0;
 function findLeastDate(dates) {
     if (dates.length < 1)
         return null;
@@ -43,4 +43,20 @@ function dateGreaterThanOrEqualTo(a, b) {
     }
 }
 exports.dateGreaterThanOrEqualTo = dateGreaterThanOrEqualTo;
+const CleanBooks = ["700"];
+function findBooks(clean, books) {
+    if (clean) {
+        if (books.length > 0) {
+            books = books.filter((book) => CleanBooks.includes(book));
+            return books.length ? books : null;
+        }
+        else {
+            return CleanBooks;
+        }
+    }
+    else {
+        return books;
+    }
+}
+exports.findBooks = findBooks;
 //# sourceMappingURL=utils.js.map

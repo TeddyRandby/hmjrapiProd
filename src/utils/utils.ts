@@ -1,15 +1,17 @@
-import { Date } from "../models/Date";
+import {Date} from "../models/Date";
 
-export function findLeastDate(dates: Date[]): Date | null {
-  if (dates.length < 1) 
+export function findLeastDate(dates: Date[]): Date|null {
+  if (dates.length < 1)
     return null
-  return dates.reduce((acc, curr)=>dateLessThanOrEqualTo(acc, curr) ? acc : curr)
+    return dates.reduce((acc, curr) =>
+                            dateLessThanOrEqualTo(acc, curr) ? acc : curr)
 }
 
-export function findGreatestDate(dates: Date[]): Date | null {
-  if (dates.length < 1) 
+export function findGreatestDate(dates: Date[]): Date|null {
+  if (dates.length < 1)
     return null;
-  return dates.reduce((acc, curr)=>dateGreaterThanOrEqualTo(acc, curr) ? acc : curr)
+  return dates.reduce((acc, curr) =>
+                          dateGreaterThanOrEqualTo(acc, curr) ? acc : curr)
 }
 
 export function dateLessThanOrEqualTo(a: Date, b: Date): boolean {
@@ -33,5 +35,20 @@ export function dateGreaterThanOrEqualTo(a: Date, b: Date): boolean {
     return true;
   } else {
     return false;
+  }
+}
+
+const CleanBooks = [ "700" ];
+
+export function findBooks(clean: boolean, books: string[]): string[]|null {
+  if (clean) {
+    if (books.length > 0) {
+      books = books.filter((book) => CleanBooks.includes(book))
+      return books.length ? books : null;
+    } else {
+      return CleanBooks
+    }
+  } else {
+    return books;
   }
 }

@@ -23,30 +23,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EntryResolver = void 0;
 const type_graphql_1 = require("type-graphql");
-const Entry_1 = require("../models/Entry");
-const Date_1 = require("../models/Date");
 const typeorm_1 = require("typeorm");
-const utils_1 = require("../utils/utils");
+const Date_1 = require("../models/Date");
+const Entry_1 = require("../models/Entry");
 const Promises_1 = require("../utils/Promises");
+const utils_1 = require("../utils/utils");
 let EntryResolver = class EntryResolver {
-    entries(max, keywords, dates, books) {
+    entries(max, clean, keywords, dates, books) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             let entries;
+            let newBooks = utils_1.findBooks(clean, books);
+            if (!newBooks) {
+                return [];
+            }
+            books = newBooks;
             if (dates.length > 0) {
-                const minDate = (_a = utils_1.findLeastDate(dates)) !== null && _a !== void 0 ? _a : { day: 100, month: 100, year: 100 };
+                const minDate = (_a = utils_1.findLeastDate(dates)) !== null && _a !== void 0 ? _a : {
+                    day: 100, month: 100, year: 100
+                };
                 const maxDate = (_b = utils_1.findGreatestDate(dates)) !== null && _b !== void 0 ? _b : { day: 0, month: 0, year: 0 };
                 entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
                     take: max,
                     where: {
                         $and: [
-                            {
-                                book: { $regex: new RegExp(books.join('|') || /./g) }
-                            },
+                            { book: { $regex: new RegExp(books.join('|') || /./g) } },
                             {
                                 $or: [
-                                    { header: { $regex: new RegExp(keywords.join('|') || /./g) } },
-                                    { content: { $regex: new RegExp(keywords.join('|') || /./g) } },
+                                    {
+                                        header: { $regex: new RegExp(keywords.join('|') || /./g) }
+                                    },
+                                    {
+                                        content: { $regex: new RegExp(keywords.join('|') || /./g) }
+                                    },
                                 ]
                             },
                             {
@@ -82,9 +91,7 @@ let EntryResolver = class EntryResolver {
                     take: max,
                     where: {
                         $and: [
-                            {
-                                book: { $regex: new RegExp(books.join('|') || /./g) }
-                            },
+                            { book: { $regex: new RegExp(books.join('|') || /./g) } },
                             {
                                 $or: [
                                     { header: { $regex: new RegExp(keywords.join('|') || /./g) } },
@@ -99,17 +106,11 @@ let EntryResolver = class EntryResolver {
         });
     }
     volume(vol) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield Promises_1.getVolumeDownloadURL(vol);
-        });
+        return __awaiter(this, void 0, void 0, function* () { return yield Promises_1.getVolumeDownloadURL(vol); });
     }
     entriesByBoxID(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
-                where: {
-                    boxID: { $eq: id }
-                }
-            });
+            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({ where: { boxID: { $eq: id } } });
             return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: entry.book, stringified: index.page.toString() }))) })));
         });
     }
@@ -153,18 +154,15 @@ let EntryResolver = class EntryResolver {
     }
     entriesByBook(books, max) {
         return __awaiter(this, void 0, void 0, function* () {
-            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
-                take: max,
-                where: {
-                    book: { $regex: new RegExp(books.join('|')) }
-                }
-            });
+            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({ take: max, where: { book: { $regex: new RegExp(books.join('|')) } } });
             return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: index.book ? index.book : entry.book, page: index.page ? index.page : "NaN" }))) })));
         });
     }
     createEntry(book) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield typeorm_1.getMongoRepository(Entry_1.Entry).create({ book, header: "", content: "", dates: [], indexes: [] }).save();
+            return yield typeorm_1.getMongoRepository(Entry_1.Entry)
+                .create({ book, header: "", content: "", dates: [], indexes: [] })
+                .save();
         });
     }
     deleteEntry(id) {
@@ -207,11 +205,7 @@ let EntryResolver = class EntryResolver {
     }
     updatePage(id, entry) {
         return __awaiter(this, void 0, void 0, function* () {
-            let original = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
-                where: {
-                    boxID: id
-                }
-            });
+            let original = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({ where: { boxID: id } });
             console.log(entry);
             return original;
         });
@@ -219,9 +213,12 @@ let EntryResolver = class EntryResolver {
 };
 __decorate([
     type_graphql_1.Query(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("max")), __param(1, type_graphql_1.Arg("keywords", () => [String])), __param(2, type_graphql_1.Arg("dates", () => [Date_1.Date])), __param(3, type_graphql_1.Arg("books", () => [String])),
+    __param(0, type_graphql_1.Arg("max")), __param(1, type_graphql_1.Arg("clean")),
+    __param(2, type_graphql_1.Arg("keywords", () => [String])),
+    __param(3, type_graphql_1.Arg("dates", () => [Date_1.Date])),
+    __param(4, type_graphql_1.Arg("books", () => [String])),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Array, Array, Array]),
+    __metadata("design:paramtypes", [Number, Boolean, Array, Array, Array]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "entries", null);
 __decorate([
@@ -248,7 +245,8 @@ __decorate([
 ], EntryResolver.prototype, "entriesByKeyword", null);
 __decorate([
     type_graphql_1.Query(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("date")), __param(1, type_graphql_1.Arg("max")),
+    __param(0, type_graphql_1.Arg("date")),
+    __param(1, type_graphql_1.Arg("max")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Date_1.Date, Number]),
     __metadata("design:returntype", Promise)
@@ -276,14 +274,16 @@ __decorate([
 ], EntryResolver.prototype, "deleteEntry", null);
 __decorate([
     type_graphql_1.Mutation(() => Entry_1.Entry),
-    __param(0, type_graphql_1.Arg("id")), __param(1, type_graphql_1.Arg("entry")),
+    __param(0, type_graphql_1.Arg("id")),
+    __param(1, type_graphql_1.Arg("entry")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Entry_1.Entry]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "updateEntry", null);
 __decorate([
     type_graphql_1.Mutation(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("id")), __param(1, type_graphql_1.Arg("entry")),
+    __param(0, type_graphql_1.Arg("id")),
+    __param(1, type_graphql_1.Arg("entry")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Entry_1.Entry]),
     __metadata("design:returntype", Promise)
