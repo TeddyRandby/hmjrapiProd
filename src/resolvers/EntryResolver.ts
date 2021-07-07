@@ -208,14 +208,14 @@ EntryResolver {
   /*
    * Update a single entry
    */
-  @Mutation(() => Entry) async updateEntry(@Arg("id") id: string,
-                                           @Arg("entry") entry: Entry) {
+  @Mutation(() => Boolean) async updateEntry(@Arg("id") id: string,
+                                             @Arg("entry") entry: Entry) {
     let original = await getMongoRepository(Entry).findOne(id);
 
     if (!original)
-      return original
+      return false;
 
-      if (entry.header)
+    if (entry.header)
       original.header = entry.header;
 
     if (entry.content)
@@ -248,24 +248,25 @@ EntryResolver {
     if (entry.organizations)
       original.organizations = entry.organizations;
 
-    await original.save();
-
-    return original;
+    if (await original.save())
+      return true;
+    else
+      return false;
   }
 
   /*
    * Update all entries associated with a certain boxID page
    */
-  @Mutation(() => [Entry]) async updatePage(@Arg("id") id: string,
-                                            @Arg("entry") entry: Entry) {
-    // const replacement = await format(ent, boxID, boxName);
-    let original = await getMongoRepository(Entry).find({where : {boxID : id}});
-
-    console.log(entry);
-
-    // Switch this to pulling the max and min dates out of dates. (Not Manual)
-
-    return original;
-  }
+  //   @Mutation(() => [Entry]) async updatePage(@Arg("id") id: string,
+  //                                             @Arg("entry") entry: Entry) {
+  //     // const replacement = await format(ent, boxID, boxName);
+  //     let original = await getMongoRepository(Entry).find({where : {boxID : id}});
+  //
+  //     console.log(entry);
+  //
+  //     // Switch this to pulling the max and min dates out of dates. (Not Manual)
+  //
+  //     return original;
+  //   }
 
 }

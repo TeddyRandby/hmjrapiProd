@@ -175,7 +175,7 @@ let EntryResolver = class EntryResolver {
         return __awaiter(this, void 0, void 0, function* () {
             let original = yield typeorm_1.getMongoRepository(Entry_1.Entry).findOne(id);
             if (!original)
-                return original;
+                return false;
             if (entry.header)
                 original.header = entry.header;
             if (entry.content)
@@ -199,15 +199,10 @@ let EntryResolver = class EntryResolver {
                 original.locations = entry.locations;
             if (entry.organizations)
                 original.organizations = entry.organizations;
-            yield original.save();
-            return original;
-        });
-    }
-    updatePage(id, entry) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let original = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({ where: { boxID: id } });
-            console.log(entry);
-            return original;
+            if (yield original.save())
+                return true;
+            else
+                return false;
         });
     }
 };
@@ -274,21 +269,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "deleteEntry", null);
 __decorate([
-    type_graphql_1.Mutation(() => Entry_1.Entry),
+    type_graphql_1.Mutation(() => Boolean),
     __param(0, type_graphql_1.Arg("id")),
     __param(1, type_graphql_1.Arg("entry")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Entry_1.Entry]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "updateEntry", null);
-__decorate([
-    type_graphql_1.Mutation(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("id")),
-    __param(1, type_graphql_1.Arg("entry")),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Entry_1.Entry]),
-    __metadata("design:returntype", Promise)
-], EntryResolver.prototype, "updatePage", null);
 EntryResolver = __decorate([
     type_graphql_1.Resolver()
 ], EntryResolver);
