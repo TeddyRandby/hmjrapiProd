@@ -43,7 +43,10 @@ function dateGreaterThanOrEqualTo(a, b) {
     }
 }
 exports.dateGreaterThanOrEqualTo = dateGreaterThanOrEqualTo;
-const CleanBooks = ["700"];
+let CleanBooks = [];
+for (let i = 689; i < 730; i++) {
+    CleanBooks.push(`${i}`);
+}
 function findBooks(clean, books) {
     if (clean) {
         if (books.length > 0) {

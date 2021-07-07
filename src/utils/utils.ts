@@ -1,5 +1,4 @@
 import {Date} from "../models/Date";
-
 export function findLeastDate(dates: Date[]): Date|null {
   if (dates.length < 1)
     return null
@@ -38,7 +37,10 @@ export function dateGreaterThanOrEqualTo(a: Date, b: Date): boolean {
   }
 }
 
-const CleanBooks = [ "700" ];
+let CleanBooks: string[] = [];
+for (let i = 689; i < 730; i++) {
+  CleanBooks.push(`${i}`);
+}
 
 export function findBooks(clean: boolean, books: string[]): string[]|null {
   if (clean) {
