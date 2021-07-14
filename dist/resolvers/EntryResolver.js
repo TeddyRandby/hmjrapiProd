@@ -108,56 +108,6 @@ let EntryResolver = class EntryResolver {
     volume(vol) {
         return __awaiter(this, void 0, void 0, function* () { return yield Promises_1.getVolumeDownloadURL(vol); });
     }
-    entriesByBoxID(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({ where: { boxID: { $eq: id } } });
-            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: entry.book, stringified: index.page.toString() }))) })));
-        });
-    }
-    entriesByKeyword(keywords, max) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
-                take: max,
-                where: {
-                    $or: [
-                        { header: { $regex: new RegExp(keywords.join('|')) } },
-                        { content: { $regex: new RegExp(keywords.join('|')) } },
-                    ],
-                },
-            });
-        });
-    }
-    entriesByDate(date, max) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield typeorm_1.getMongoRepository(Entry_1.Entry).find({
-                take: max,
-                where: {
-                    $and: [
-                        {
-                            $and: [
-                                { "minDate.day": { $lte: date.day } },
-                                { "minDate.month": { $lte: date.month } },
-                                { "minDate.year": { $lte: date.year } },
-                            ],
-                        },
-                        {
-                            $and: [
-                                { "maxDate.day": { $gte: date.day } },
-                                { "maxDate.month": { $gte: date.month } },
-                                { "maxDate.year": { $gte: date.year } },
-                            ],
-                        },
-                    ],
-                },
-            });
-        });
-    }
-    entriesByBook(books, max) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({ take: max, where: { book: { $regex: new RegExp(books.join('|')) } } });
-            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: index.book ? index.book : entry.book, page: index.page ? index.page : "NaN" }))) })));
-        });
-    }
     createEntry(book) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield typeorm_1.getMongoRepository(Entry_1.Entry)
@@ -171,38 +121,31 @@ let EntryResolver = class EntryResolver {
             return result.affected || 0;
         });
     }
-    updateEntry(id, entry) {
+    updateEntry(id, author, entry) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!utils_1.validateAuthor(author))
+                return "Invalid Author";
             let original = yield typeorm_1.getMongoRepository(Entry_1.Entry).findOne(id);
             if (!original)
-                return false;
-            if (entry.header)
-                original.header = entry.header;
-            if (entry.content)
-                original.content = entry.content;
-            if (entry.book)
-                original.book = entry.book;
+                return "Invalid id";
+            original.mostRecentAuthor = author;
             if (entry.dates) {
                 original.dates = entry.dates;
-                let least = utils_1.findLeastDate(entry.dates);
-                if (least)
-                    original.minDate = least;
-                let greatest = utils_1.findGreatestDate(entry.dates);
-                if (greatest)
-                    original.maxDate = greatest;
+                original.minDate = utils_1.findLeastDate(entry.dates) || original.minDate;
+                original.maxDate = utils_1.findGreatestDate(entry.dates) || original.maxDate;
             }
-            if (entry.indexes)
-                original.indexes = entry.indexes;
-            if (entry.people)
-                original.people = entry.people;
-            if (entry.locations)
-                original.locations = entry.locations;
-            if (entry.organizations)
-                original.organizations = entry.organizations;
+            original.header = entry.header || original.header;
+            original.content = entry.content || original.content;
+            original.book = entry.book || original.book;
+            original.indexes = entry.indexes || original.indexes;
+            original.people = entry.people || original.people;
+            original.locations = entry.locations || original.locations;
+            original.organizations = entry.organizations || original.organizations;
+            original.tags = entry.tags || original.tags;
             if (yield original.save())
-                return true;
+                return "Updated entry";
             else
-                return false;
+                return "Could not save entry";
         });
     }
 };
@@ -210,9 +153,9 @@ __decorate([
     type_graphql_1.Query(() => [Entry_1.Entry]),
     __param(0, type_graphql_1.Arg("max", { defaultValue: 50 })),
     __param(1, type_graphql_1.Arg("clean", { defaultValue: false })),
-    __param(2, type_graphql_1.Arg("keywords", () => [String])),
-    __param(3, type_graphql_1.Arg("dates", () => [Date_1.Date])),
-    __param(4, type_graphql_1.Arg("books", () => [String])),
+    __param(2, type_graphql_1.Arg("keywords", _ => [String], { defaultValue: [] })),
+    __param(3, type_graphql_1.Arg("dates", _ => [Date_1.Date], { defaultValue: [] })),
+    __param(4, type_graphql_1.Arg("books", _ => [String], { defaultValue: [] })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Boolean, Array, Array, Array]),
     __metadata("design:returntype", Promise)
@@ -224,36 +167,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "volume", null);
-__decorate([
-    type_graphql_1.Query(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("id")),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], EntryResolver.prototype, "entriesByBoxID", null);
-__decorate([
-    type_graphql_1.Query(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("keyword", () => [String])),
-    __param(1, type_graphql_1.Arg("max")),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Array, Number]),
-    __metadata("design:returntype", Promise)
-], EntryResolver.prototype, "entriesByKeyword", null);
-__decorate([
-    type_graphql_1.Query(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("date")),
-    __param(1, type_graphql_1.Arg("max")),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Date_1.Date, Number]),
-    __metadata("design:returntype", Promise)
-], EntryResolver.prototype, "entriesByDate", null);
-__decorate([
-    type_graphql_1.Query(() => [Entry_1.Entry]),
-    __param(0, type_graphql_1.Arg("book", () => [String])), __param(1, type_graphql_1.Arg("max")),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Array, Number]),
-    __metadata("design:returntype", Promise)
-], EntryResolver.prototype, "entriesByBook", null);
 __decorate([
     type_graphql_1.Mutation(() => Entry_1.Entry),
     __param(0, type_graphql_1.Arg("book")),
@@ -269,11 +182,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "deleteEntry", null);
 __decorate([
-    type_graphql_1.Mutation(() => Boolean),
+    type_graphql_1.Mutation(() => String),
     __param(0, type_graphql_1.Arg("id")),
-    __param(1, type_graphql_1.Arg("entry")),
+    __param(1, type_graphql_1.Arg("author")),
+    __param(2, type_graphql_1.Arg("entry")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Entry_1.Entry]),
+    __metadata("design:paramtypes", [String, String, Entry_1.Entry]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "updateEntry", null);
 EntryResolver = __decorate([

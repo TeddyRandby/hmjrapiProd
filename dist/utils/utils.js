@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findBooks = exports.dateGreaterThanOrEqualTo = exports.dateLessThanOrEqualTo = exports.findGreatestDate = exports.findLeastDate = void 0;
+exports.validateAuthor = exports.findBooks = exports.dateGreaterThanOrEqualTo = exports.dateLessThanOrEqualTo = exports.findGreatestDate = exports.findLeastDate = void 0;
 function findLeastDate(dates) {
     if (dates.length < 1)
         return null;
@@ -62,4 +62,8 @@ function findBooks(clean, books) {
     }
 }
 exports.findBooks = findBooks;
+function validateAuthor(author) {
+    return ["tedrandby@gmail.com"].includes(author);
+}
+exports.validateAuthor = validateAuthor;
 //# sourceMappingURL=utils.js.map

@@ -1,25 +1,25 @@
 import {Arg, Mutation, Query, Resolver} from "type-graphql";
 import {getMongoRepository} from "typeorm";
-
 import {Date} from "../models/Date";
 import {Entry} from "../models/Entry";
 import {getVolumeDownloadURL} from "../utils/Promises";
 import {
   findBooks,
   findGreatestDate,
-  findLeastDate
+  findLeastDate,
+  validateAuthor
 } from "../utils/utils"
 
     @Resolver() export class
 EntryResolver {
   /* ------ Queries ------ */
 
-  @Query(() => [Entry])
-  async entries(@Arg("max", {defaultValue : 50}) max: number,
-                @Arg("clean", {defaultValue : false}) clean: boolean,
-                @Arg("keywords", () => [String]) keywords: string[],
-                @Arg("dates", () => [Date]) dates: Date[],
-                @Arg("books", () => [String]) books: string[]) {
+  @Query(() => [Entry]) async entries(
+      @Arg("max", {defaultValue : 50}) max: number,
+      @Arg("clean", {defaultValue : false}) clean: boolean,
+      @Arg("keywords", _ => [String], {defaultValue : []}) keywords: string[],
+      @Arg("dates", _ => [Date], {defaultValue : []}) dates: Date[],
+      @Arg("books", _ => [String], {defaultValue : []}) books: string[]) {
     let entries;
 
     let newBooks = findBooks(clean, books)
@@ -112,81 +112,7 @@ EntryResolver {
   @Query(() => String) async volume(
       @Arg("volume") vol: string) { return await getVolumeDownloadURL(vol);}
 
-  // Quick fix for entries where Index wasn't parsed correctly.
-  @Query(() => [Entry]) async entriesByBoxID(@Arg("id") id: string) {
-    let entries =
-        await getMongoRepository(Entry).find({where : {boxID : {$eq : id}}})
-    return entries.map(
-        entry => ({
-          ...entry,
-          indexes : entry.indexes.map(index => ({
-                                        ...index,
-                                        book : entry.book,
-                                        stringified : index.page.toString()
-                                      }))
-        }));
-  }
-
-  // Grab entries with a certain keyword present. TODO: Multiple keywords.
-  @Query(() => [Entry])
-  async entriesByKeyword(@Arg("keyword", () => [String]) keywords: [ string ],
-                         @Arg("max") max: number) {
-    return await getMongoRepository(Entry).find({
-      take : max,
-      where : {
-        $or : [
-          {header : {$regex : new RegExp(keywords.join('|'))}},
-          {content : {$regex : new RegExp(keywords.join('|'))}},
-        ],
-      },
-    });
-  }
-
-  // Grab entries within a certain date. TODO: Date range.
-  @Query(() => [Entry]) async entriesByDate(@Arg("date") date: Date,
-                                            @Arg("max") max: number) {
-    return await getMongoRepository(Entry).find({
-      take : max,
-      where : {
-        $and : [
-          {
-            $and : [
-              {"minDate.day" : {$lte : date.day}},
-              {"minDate.month" : {$lte : date.month}},
-              {"minDate.year" : {$lte : date.year}},
-            ],
-          },
-          {
-            $and : [
-              {"maxDate.day" : {$gte : date.day}},
-              {"maxDate.month" : {$gte : date.month}},
-              {"maxDate.year" : {$gte : date.year}},
-            ],
-          },
-        ],
-      },
-    });
-  }
-
-  @Query(() => [Entry]) async entriesByBook(
-      @Arg("book", () => [String]) books: [ string ], @Arg("max") max: number) {
-    let entries = await getMongoRepository(Entry).find(
-        {take : max, where : {book : {$regex : new RegExp(books.join('|'))}}});
-
-    return entries.map(entry => ({
-                         ...entry,
-                         indexes : entry.indexes.map(
-                             index => ({
-                               ...index,
-                               book : index.book ? index.book : entry.book,
-                               page : index.page ? index.page : "NaN"
-                             }))
-                       }));
-  }
-
   /* ------ Mutations ------ */
-  // Comment out mutations. DB should be static now
-
   /*
    * Create a new, blank entry and return it.
    */
@@ -207,66 +133,48 @@ EntryResolver {
 
   /*
    * Update a single entry
+   * Return true if successful.
    */
-  @Mutation(() => Boolean) async updateEntry(@Arg("id") id: string,
-                                             @Arg("entry") entry: Entry) {
+  @Mutation(() => String) async updateEntry(@Arg("id") id: string,
+                                            @Arg("author") author: string,
+                                            @Arg("entry") entry: Entry) {
+    if (!validateAuthor(author))
+      return "Invalid Author";
+
     let original = await getMongoRepository(Entry).findOne(id);
 
     if (!original)
-      return false;
+      return "Invalid id";
 
-    if (entry.header)
-      original.header = entry.header;
-
-    if (entry.content)
-      original.content = entry.content;
-
-    if (entry.book)
-      original.book = entry.book;
+    original.mostRecentAuthor = author;
 
     if (entry.dates) {
       original.dates = entry.dates;
 
-      let least = findLeastDate(entry.dates);
-      if (least)
-        original.minDate = least;
+      original.minDate = findLeastDate(entry.dates) || original.minDate;
 
-      let greatest = findGreatestDate(entry.dates);
-      if (greatest)
-        original.maxDate = greatest;
+      original.maxDate = findGreatestDate(entry.dates) || original.maxDate;
     }
 
-    if (entry.indexes)
-      original.indexes = entry.indexes;
+    original.header = entry.header || original.header;
 
-    if (entry.people)
-      original.people = entry.people;
+    original.content = entry.content || original.content;
 
-    if (entry.locations)
-      original.locations = entry.locations;
+    original.book = entry.book || original.book;
 
-    if (entry.organizations)
-      original.organizations = entry.organizations;
+    original.indexes = entry.indexes || original.indexes;
+
+    original.people = entry.people || original.people;
+
+    original.locations = entry.locations || original.locations;
+
+    original.organizations = entry.organizations || original.organizations;
+
+    original.tags = entry.tags || original.tags;
 
     if (await original.save())
-      return true;
+      return "Updated entry";
     else
-      return false;
+      return "Could not save entry";
   }
-
-  /*
-   * Update all entries associated with a certain boxID page
-   */
-  //   @Mutation(() => [Entry]) async updatePage(@Arg("id") id: string,
-  //                                             @Arg("entry") entry: Entry) {
-  //     // const replacement = await format(ent, boxID, boxName);
-  //     let original = await getMongoRepository(Entry).find({where : {boxID : id}});
-  //
-  //     console.log(entry);
-  //
-  //     // Switch this to pulling the max and min dates out of dates. (Not Manual)
-  //
-  //     return original;
-  //   }
-
 }

@@ -1,27 +1,17 @@
-import { Entity, BaseEntity, Column, PrimaryColumn } from "typeorm";
-import { ObjectType, Field, InputType } from "type-graphql";
+import {Field, InputType, ObjectType} from "type-graphql";
+import {BaseEntity, Column, Entity, PrimaryColumn} from "typeorm";
 
 @Entity()
 @ObjectType()
 @InputType("DateInput")
 export class Date extends BaseEntity {
-  @Field(() => Number, { nullable: true})
-  @Column()
-  day: number;
+  @Field({nullable : true}) @Column() day: number;
 
-  @Field(() => Number, { nullable: true})
-  @Column()
-  month: number;
+  @Field({nullable : true}) @Column() month: number;
 
-  @Field(() => Number, { nullable: true})
-  @Column()
-  year: number;
+  @Field({nullable : true}) @Column() year: number;
 
-  @Field(() => String, { nullable: true})
-  @PrimaryColumn()
-  stringified: string;
+  @Field({nullable : true}) @PrimaryColumn() stringified: string;
 
-  @Field(() => String, { nullable: true })
-  @Column()
-  content: string;
+  @Field({nullable : true}) @Column() content: string;
 }

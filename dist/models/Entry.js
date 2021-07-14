@@ -10,69 +10,78 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Entry = void 0;
+const type_graphql_1 = require("type-graphql");
 const typeorm_1 = require("typeorm");
 const Date_1 = require("../models/Date");
 const Index_1 = require("../models/Index");
-const type_graphql_1 = require("type-graphql");
 let Entry = class Entry extends typeorm_1.BaseEntity {
 };
 __decorate([
-    type_graphql_1.Field(() => String, { nullable: true }),
+    type_graphql_1.Field(_ => String, { nullable: true }),
     typeorm_1.ObjectIdColumn(),
     __metadata("design:type", typeorm_1.ObjectID)
 ], Entry.prototype, "_id", void 0);
 __decorate([
-    type_graphql_1.Field(() => String, { nullable: true }),
+    typeorm_1.Column({ default: "" }),
+    __metadata("design:type", String)
+], Entry.prototype, "mostRecentAuthor", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Entry.prototype, "boxID", void 0);
 __decorate([
-    type_graphql_1.Field(() => String, { nullable: true }),
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Entry.prototype, "book", void 0);
 __decorate([
-    type_graphql_1.Field(() => String, { nullable: true }),
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Entry.prototype, "header", void 0);
 __decorate([
-    type_graphql_1.Field(() => String, { nullable: true }),
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Entry.prototype, "content", void 0);
 __decorate([
-    type_graphql_1.Field(() => [Date_1.Date], { nullable: true }),
+    type_graphql_1.Field(_ => [Date_1.Date], { nullable: true }),
     typeorm_1.Column({ default: [] }),
     __metadata("design:type", Array)
 ], Entry.prototype, "dates", void 0);
 __decorate([
-    type_graphql_1.Field(() => [Index_1.Index], { nullable: true }),
+    type_graphql_1.Field(_ => [Index_1.Index], { nullable: true }),
     typeorm_1.Column({ default: [] }),
     __metadata("design:type", Array)
 ], Entry.prototype, "indexes", void 0);
 __decorate([
-    type_graphql_1.Field(() => [String], { nullable: true }),
+    type_graphql_1.Field(_ => [String], { nullable: true }),
     typeorm_1.Column({ default: [] }),
     __metadata("design:type", Array)
 ], Entry.prototype, "people", void 0);
 __decorate([
-    type_graphql_1.Field(() => [String], { nullable: true }),
+    type_graphql_1.Field(_ => [String], { nullable: true }),
     typeorm_1.Column({ default: [] }),
     __metadata("design:type", Array)
 ], Entry.prototype, "locations", void 0);
 __decorate([
-    type_graphql_1.Field(() => [String], { nullable: true }),
+    type_graphql_1.Field(_ => [String], { nullable: true }),
     typeorm_1.Column({ default: [] }),
     __metadata("design:type", Array)
 ], Entry.prototype, "organizations", void 0);
 __decorate([
-    type_graphql_1.Field(() => Date_1.Date, { nullable: true }),
+    type_graphql_1.Field(_ => [String], { nullable: true }),
+    typeorm_1.Column({ default: [] }),
+    __metadata("design:type", Array)
+], Entry.prototype, "tags", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.Column(),
     __metadata("design:type", Date_1.Date)
 ], Entry.prototype, "minDate", void 0);
 __decorate([
-    type_graphql_1.Field(() => Date_1.Date, { nullable: true }),
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.Column(),
     __metadata("design:type", Date_1.Date)
 ], Entry.prototype, "maxDate", void 0);

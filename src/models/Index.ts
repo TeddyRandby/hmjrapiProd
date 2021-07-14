@@ -1,22 +1,15 @@
-import { Entity, Column, BaseEntity, PrimaryColumn } from "typeorm";
-import { ObjectType, Field, InputType } from "type-graphql";
+import {Field, InputType, ObjectType} from "type-graphql";
+import {BaseEntity, Column, Entity, PrimaryColumn} from "typeorm";
 
 @Entity()
 @ObjectType()
 @InputType("IndexInput")
 export class Index extends BaseEntity {
-  @Field(() => String, { nullable: true })
-  @PrimaryColumn()
-  content: string;
+  @Field({nullable : true}) @Column() content: string;
 
-  @PrimaryColumn()
-  stringified: string;
+  @PrimaryColumn() stringified: string;
 
-  @Field(() => String, {nullable: true})
-  @Column()
-  book: string;
+  @Field({nullable : true}) @Column() book: string;
 
-  @Field(() => String, { nullable: true })
-  @Column()
-  page: string;
+  @Field({nullable : true}) @Column() page: string;
 }

@@ -10,32 +10,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Date = void 0;
-const typeorm_1 = require("typeorm");
 const type_graphql_1 = require("type-graphql");
+const typeorm_1 = require("typeorm");
 let Date = class Date extends typeorm_1.BaseEntity {
 };
 __decorate([
-    type_graphql_1.Field(() => Number, { nullable: true }),
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.Column(),
     __metadata("design:type", Number)
 ], Date.prototype, "day", void 0);
 __decorate([
-    type_graphql_1.Field(() => Number, { nullable: true }),
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.Column(),
     __metadata("design:type", Number)
 ], Date.prototype, "month", void 0);
 __decorate([
-    type_graphql_1.Field(() => Number, { nullable: true }),
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.Column(),
     __metadata("design:type", Number)
 ], Date.prototype, "year", void 0);
 __decorate([
-    type_graphql_1.Field(() => String, { nullable: true }),
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.PrimaryColumn(),
     __metadata("design:type", String)
 ], Date.prototype, "stringified", void 0);
 __decorate([
-    type_graphql_1.Field(() => String, { nullable: true }),
+    type_graphql_1.Field({ nullable: true }),
     typeorm_1.Column(),
     __metadata("design:type", String)
 ], Date.prototype, "content", void 0);
