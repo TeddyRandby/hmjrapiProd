@@ -132,9 +132,19 @@ EntryResolver {
   /*
    * Create a new, blank entry and return it.
    */
-  @Mutation(() => Entry) async createEntry(@Arg("book") book: string) {
+  @Mutation(() => Entry) async createEntry(@Arg("author") author: string,
+                                           @Arg("book") book: string) {
+    if (!validateAuthor(author))
+      return null;
     return await getMongoRepository(Entry)
-        .create({book, header : "", content : "", dates : [], indexes : []})
+        .create({
+          book,
+          header : "",
+          content : "",
+          dates : [],
+          indexes : [],
+          mostRecentAuthor : author
+        })
         .save();
   }
 
@@ -142,7 +152,10 @@ EntryResolver {
    * Delete an entry and return the number of deleted entries
    * For some reason this returns an empty object. dk why.
    */
-  @Mutation(() => Number) async deleteEntry(@Arg("id") id: string) {
+  @Mutation(() => Number) async deleteEntry(@Arg("id") id: string,
+                                            @Arg("author") author: string) {
+    if (!validateAuthor(author))
+      return 0;
     const result = await getMongoRepository(Entry).delete(id);
     return result.affected || 0;
   }

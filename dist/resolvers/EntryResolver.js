@@ -114,15 +114,26 @@ let EntryResolver = class EntryResolver {
     volume(vol) {
         return __awaiter(this, void 0, void 0, function* () { return yield Promises_1.getVolumeDownloadURL(vol); });
     }
-    createEntry(book) {
+    createEntry(author, book) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!utils_1.validateAuthor(author))
+                return null;
             return yield typeorm_1.getMongoRepository(Entry_1.Entry)
-                .create({ book, header: "", content: "", dates: [], indexes: [] })
+                .create({
+                book,
+                header: "",
+                content: "",
+                dates: [],
+                indexes: [],
+                mostRecentAuthor: author
+            })
                 .save();
         });
     }
-    deleteEntry(id) {
+    deleteEntry(id, author) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!utils_1.validateAuthor(author))
+                return 0;
             const result = yield typeorm_1.getMongoRepository(Entry_1.Entry).delete(id);
             return result.affected || 0;
         });
@@ -182,16 +193,18 @@ __decorate([
 ], EntryResolver.prototype, "volume", null);
 __decorate([
     type_graphql_1.Mutation(() => Entry_1.Entry),
-    __param(0, type_graphql_1.Arg("book")),
+    __param(0, type_graphql_1.Arg("author")),
+    __param(1, type_graphql_1.Arg("book")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "createEntry", null);
 __decorate([
     type_graphql_1.Mutation(() => Number),
     __param(0, type_graphql_1.Arg("id")),
+    __param(1, type_graphql_1.Arg("author")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "deleteEntry", null);
 __decorate([

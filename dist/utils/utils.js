@@ -63,7 +63,7 @@ function findBooks(clean, books) {
 }
 exports.findBooks = findBooks;
 function validateAuthor(author) {
-    return ["tedrandby@gmail.com"].includes(author);
+    return ["tedrandby@gmail.com", "HMJRVerifier"].includes(author);
 }
 exports.validateAuthor = validateAuthor;
 //# sourceMappingURL=utils.js.map

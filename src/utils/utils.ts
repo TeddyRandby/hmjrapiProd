@@ -56,5 +56,5 @@ export function findBooks(clean: boolean, books: string[]): string[]|null {
 }
 
 export function validateAuthor(author: string): boolean {
-  return [ "tedrandby@gmail.com" ].includes(author);
+  return [ "tedrandby@gmail.com", "HMJRVerifier" ].includes(author);
 }
