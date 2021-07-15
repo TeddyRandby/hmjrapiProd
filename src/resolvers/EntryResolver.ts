@@ -109,6 +109,22 @@ EntryResolver {
                        }));
   }
 
+  @Query(() => [Entry]) async entriesByBook(
+      @Arg("book", () => [String]) books: [ string ], @Arg("max") max: number) {
+    let entries = await getMongoRepository(Entry).find(
+        {take : max, where : {book : {$regex : new RegExp(books.join('|'))}}});
+
+    return entries.map(entry => ({
+                         ...entry,
+                         indexes : entry.indexes.map(
+                             index => ({
+                               ...index,
+                               book : index.book ? index.book : entry.book,
+                               page : index.page ? index.page : "NaN"
+                             }))
+                       }));
+  }
+
   @Query(() => String) async volume(
       @Arg("volume") vol: string) { return await getVolumeDownloadURL(vol);}
 

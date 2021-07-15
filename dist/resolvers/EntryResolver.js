@@ -105,6 +105,12 @@ let EntryResolver = class EntryResolver {
             return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: index.book ? index.book : entry.book, page: index.page ? index.page : "NaN" }))) })));
         });
     }
+    entriesByBook(books, max) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({ take: max, where: { book: { $regex: new RegExp(books.join('|')) } } });
+            return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: index.book ? index.book : entry.book, page: index.page ? index.page : "NaN" }))) })));
+        });
+    }
     volume(vol) {
         return __awaiter(this, void 0, void 0, function* () { return yield Promises_1.getVolumeDownloadURL(vol); });
     }
@@ -160,6 +166,13 @@ __decorate([
     __metadata("design:paramtypes", [Number, Boolean, Array, Array, Array]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "entries", null);
+__decorate([
+    type_graphql_1.Query(() => [Entry_1.Entry]),
+    __param(0, type_graphql_1.Arg("book", () => [String])), __param(1, type_graphql_1.Arg("max")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array, Number]),
+    __metadata("design:returntype", Promise)
+], EntryResolver.prototype, "entriesByBook", null);
 __decorate([
     type_graphql_1.Query(() => String),
     __param(0, type_graphql_1.Arg("volume")),
