@@ -1,16 +1,16 @@
-import {Date} from "../models/Date";
-export function findLeastDate(dates: Date[]): Date|null {
+import { Date } from "../models/Date";
+export function findLeastDate(dates: Date[]): Date | null {
   if (dates.length < 1)
     return null
-    return dates.reduce((acc, curr) =>
-                            dateLessThanOrEqualTo(acc, curr) ? acc : curr)
+  return dates.reduce((acc, curr) =>
+    dateLessThanOrEqualTo(acc, curr) ? acc : curr)
 }
 
-export function findGreatestDate(dates: Date[]): Date|null {
+export function findGreatestDate(dates: Date[]): Date | null {
   if (dates.length < 1)
     return null;
   return dates.reduce((acc, curr) =>
-                          dateGreaterThanOrEqualTo(acc, curr) ? acc : curr)
+    dateGreaterThanOrEqualTo(acc, curr) ? acc : curr)
 }
 
 export function dateLessThanOrEqualTo(a: Date, b: Date): boolean {
@@ -42,7 +42,7 @@ for (let i = 689; i < 749; i++) {
   CleanBooks.push(`${i}`);
 }
 
-export function findBooks(clean: boolean, books: string[]): string[]|null {
+export function findBooks(clean: boolean, books: string[]): string[] | null {
   if (clean) {
     if (books.length > 0) {
       books = books.filter((book) => CleanBooks.includes(book))
@@ -54,7 +54,7 @@ export function findBooks(clean: boolean, books: string[]): string[]|null {
     return books;
   }
 }
-
+["tedrandby@gmail.com", "HMJRVerifier", "agondek@rooseveltinstitue.org"]
 export function validateAuthor(author: string): boolean {
-  return [ "tedrandby@gmail.com", "HMJRVerifier" ].includes(author);
+  return process.env.VALID_AUTHORS.split(' ').includes(author);
 }
