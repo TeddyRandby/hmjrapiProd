@@ -109,7 +109,11 @@ import {
       })
     }
 
-    entries = await getMongoRepository(Entry).find(query);
+    if (query.where.$and.length > 0) {
+      entries = await getMongoRepository(Entry).find(query);
+    } else {
+      entries = await getMongoRepository(Entry).find({ take: max });
+    }
 
     return entries.map(entry => ({
       ...entry,

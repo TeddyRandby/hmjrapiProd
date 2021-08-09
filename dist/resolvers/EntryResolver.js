@@ -94,7 +94,12 @@ let EntryResolver = class EntryResolver {
                     ]
                 });
             }
-            entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find(query);
+            if (query.where.$and.length > 0) {
+                entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find(query);
+            }
+            else {
+                entries = yield typeorm_1.getMongoRepository(Entry_1.Entry).find({ take: max });
+            }
             return entries.map(entry => (Object.assign(Object.assign({}, entry), { indexes: entry.indexes.map(index => (Object.assign(Object.assign({}, index), { book: index.book ? index.book : entry.book, page: index.page ? index.page : "NaN" }))) })));
         });
     }
