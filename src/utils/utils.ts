@@ -38,7 +38,7 @@ export function dateGreaterThanOrEqualTo(a: Date, b: Date): boolean {
 }
 
 let CleanBooks: string[] = [];
-for (let i = 689; i < 749; i++) {
+for (let i = parseInt(process.env.CLEAN_BOOKS_START); i < parseInt(process.env.CLEAN_BOOKS_END); i++) {
   CleanBooks.push(`${i}`);
 }
 
