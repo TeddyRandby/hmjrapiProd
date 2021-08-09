@@ -1,8 +1,8 @@
-import {Arg, Mutation, Query, Resolver} from "type-graphql";
-import {getMongoRepository} from "typeorm";
-import {Date} from "../models/Date";
-import {Entry} from "../models/Entry";
-import {getVolumeDownloadURL} from "../utils/Promises";
+import { Arg, Mutation, Query, Resolver } from "type-graphql";
+import { getMongoRepository } from "typeorm";
+import { Date } from "../models/Date";
+import { Entry } from "../models/Entry";
+import { getVolumeDownloadURL } from "../utils/Promises";
 import {
   findBooks,
   findGreatestDate,
@@ -10,16 +10,17 @@ import {
   validateAuthor
 } from "../utils/utils"
 
-    @Resolver() export class
-EntryResolver {
+@Resolver() export class
+  EntryResolver {
   /* ------ Queries ------ */
 
   @Query(() => [Entry]) async entries(
-      @Arg("max", {defaultValue : 50}) max: number,
-      @Arg("clean", {defaultValue : false}) clean: boolean,
-      @Arg("keywords", _ => [String], {defaultValue : []}) keywords: string[],
-      @Arg("dates", _ => [Date], {defaultValue : []}) dates: Date[],
-      @Arg("books", _ => [String], {defaultValue : []}) books: string[]) {
+    @Arg("max", { defaultValue: 50 }) max: number,
+    @Arg("clean", { defaultValue: false }) clean: boolean,
+    @Arg("keywords", _ => [String], { defaultValue: [] }) keywords: string[],
+    @Arg("dates", _ => [Date], { defaultValue: [] }) dates: Date[],
+    @Arg("tags", _ => [String], { defaultValue: [] }) tags: string[],
+    @Arg("books", _ => [String], { defaultValue: [] }) books: string[]) {
     let entries;
 
     let newBooks = findBooks(clean, books)
@@ -35,62 +36,63 @@ EntryResolver {
         day: 100, month: 100, year: 100
       }
       const maxDate = findGreatestDate(dates)
-          ?? {day : 0, month : 0, year : 0}
+        ?? { day: 0, month: 0, year: 0 }
 
-             entries = await getMongoRepository(Entry).find({
-               take : max,
-               where : {
-                 $and : [
-                   {book : {$regex : new RegExp(books.join('|') || /./g)}},
-                   {
-                     $or : [
-                       {
-                         header :
-                             {$regex : new RegExp(keywords.join('|') || /./g)}
-                       },
-                       {
-                         content :
-                             {$regex : new RegExp(keywords.join('|') || /./g)}
-                       },
-                     ]
-                   },
-                   {
-                     $or : [
-                       {
-                         $and : [
-                           {"minDate.day" : {$lte : maxDate.day}},
-                           {"minDate.month" : {$lte : maxDate.month}},
-                           {"minDate.year" : {$lte : maxDate.year}},
-                           {"minDate.day" : {$gte : minDate.day}},
-                           {"minDate.month" : {$gte : minDate.month}},
-                           {"minDate.year" : {$gte : minDate.year}},
-                         ],
-                       },
-                       {
-                         $and : [
-                           {"maxDate.day" : {$lte : minDate.day}},
-                           {"maxDate.month" : {$lte : minDate.month}},
-                           {"maxDate.year" : {$lte : minDate.year}},
-                           {"maxDate.day" : {$gte : maxDate.day}},
-                           {"maxDate.month" : {$gte : maxDate.month}},
-                           {"maxDate.year" : {$gte : maxDate.year}},
-                         ],
-                       },
-                     ],
-                   },
-                 ]
-               }
-             })
+      entries = await getMongoRepository(Entry).find({
+        take: max,
+        where: {
+          $and: [
+            { book: { $regex: new RegExp(books.join('|') || /./g) } },
+            { tags: { $elemMatch: { $in: tags } } },
+            {
+              $or: [
+                {
+                  header:
+                    { $regex: new RegExp(keywords.join('|') || /./g) }
+                },
+                {
+                  content:
+                    { $regex: new RegExp(keywords.join('|') || /./g) }
+                },
+              ]
+            }, {
+              $or: [
+                {
+                  $and: [
+                    { "minDate.day": { $lte: maxDate.day } },
+                    { "minDate.month": { $lte: maxDate.month } },
+                    { "minDate.year": { $lte: maxDate.year } },
+                    { "minDate.day": { $gte: minDate.day } },
+                    { "minDate.month": { $gte: minDate.month } },
+                    { "minDate.year": { $gte: minDate.year } },
+                  ],
+                },
+                {
+                  $and: [
+                    { "maxDate.day": { $lte: minDate.day } },
+                    { "maxDate.month": { $lte: minDate.month } },
+                    { "maxDate.year": { $lte: minDate.year } },
+                    { "maxDate.day": { $gte: maxDate.day } },
+                    { "maxDate.month": { $gte: maxDate.month } },
+                    { "maxDate.year": { $gte: maxDate.year } },
+                  ],
+                },
+              ],
+            },
+          ]
+        }
+      })
     } else {
       entries = await getMongoRepository(Entry).find({
-        take : max,
-        where : {
-          $and : [
-            {book : {$regex : new RegExp(books.join('|') || /./g)}},
+        take: max,
+        where: {
+          $and: [
+            { book: { $regex: new RegExp(books.join('|') || /./g) } },
+            { tags: { $elemMatch: { $in: tags } } },
             {
-              $or : [
-                {header : {$regex : new RegExp(keywords.join('|') || /./g)}},
-                {content : {$regex : new RegExp(keywords.join('|') || /./g)}},
+              $or: [
+                { header: { $regex: new RegExp(keywords.join('|') || /./g) } },
+                { content: { $regex: new RegExp(keywords.join('|') || /./g) } },
               ]
             },
           ]
@@ -99,53 +101,53 @@ EntryResolver {
     }
 
     return entries.map(entry => ({
-                         ...entry,
-                         indexes : entry.indexes.map(
-                             index => ({
-                               ...index,
-                               book : index.book ? index.book : entry.book,
-                               page : index.page ? index.page : "NaN"
-                             }))
-                       }));
+      ...entry,
+      indexes: entry.indexes.map(
+        index => ({
+          ...index,
+          book: index.book ? index.book : entry.book,
+          page: index.page ? index.page : "NaN"
+        }))
+    }));
   }
 
   @Query(() => [Entry]) async entriesByBook(
-      @Arg("book", () => [String]) books: [ string ], @Arg("max") max: number) {
+    @Arg("book", () => [String]) books: [string], @Arg("max") max: number) {
     let entries = await getMongoRepository(Entry).find(
-        {take : max, where : {book : {$regex : new RegExp(books.join('|'))}}});
+      { take: max, where: { book: { $regex: new RegExp(books.join('|')) } } });
 
     return entries.map(entry => ({
-                         ...entry,
-                         indexes : entry.indexes.map(
-                             index => ({
-                               ...index,
-                               book : index.book ? index.book : entry.book,
-                               page : index.page ? index.page : "NaN"
-                             }))
-                       }));
+      ...entry,
+      indexes: entry.indexes.map(
+        index => ({
+          ...index,
+          book: index.book ? index.book : entry.book,
+          page: index.page ? index.page : "NaN"
+        }))
+    }));
   }
 
   @Query(() => String) async volume(
-      @Arg("volume") vol: string) { return await getVolumeDownloadURL(vol);}
+    @Arg("volume") vol: string) { return await getVolumeDownloadURL(vol); }
 
   /* ------ Mutations ------ */
   /*
    * Create a new, blank entry and return it.
    */
   @Mutation(() => Entry) async createEntry(@Arg("author") author: string,
-                                           @Arg("book") book: string) {
+    @Arg("book") book: string) {
     if (!validateAuthor(author))
       return null;
     return await getMongoRepository(Entry)
-        .create({
-          book,
-          header : "",
-          content : "",
-          dates : [],
-          indexes : [],
-          mostRecentAuthor : author
-        })
-        .save();
+      .create({
+        book,
+        header: "",
+        content: "",
+        dates: [],
+        indexes: [],
+        mostRecentAuthor: author
+      })
+      .save();
   }
 
   /*
@@ -153,7 +155,7 @@ EntryResolver {
    * For some reason this returns an empty object. dk why.
    */
   @Mutation(() => Number) async deleteEntry(@Arg("id") id: string,
-                                            @Arg("author") author: string) {
+    @Arg("author") author: string) {
     if (!validateAuthor(author))
       return 0;
     const result = await getMongoRepository(Entry).delete(id);
@@ -165,8 +167,8 @@ EntryResolver {
    * Return true if successful.
    */
   @Mutation(() => String) async updateEntry(@Arg("id") id: string,
-                                            @Arg("author") author: string,
-                                            @Arg("entry") entry: Entry) {
+    @Arg("author") author: string,
+    @Arg("entry") entry: Entry) {
     if (!validateAuthor(author))
       return "Invalid Author";
 

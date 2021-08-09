@@ -29,7 +29,7 @@ const Entry_1 = require("../models/Entry");
 const Promises_1 = require("../utils/Promises");
 const utils_1 = require("../utils/utils");
 let EntryResolver = class EntryResolver {
-    entries(max, clean, keywords, dates, books) {
+    entries(max, clean, keywords, dates, tags, books) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             let entries;
@@ -48,6 +48,7 @@ let EntryResolver = class EntryResolver {
                     where: {
                         $and: [
                             { book: { $regex: new RegExp(books.join('|') || /./g) } },
+                            { tags: { $elemMatch: { $in: tags } } },
                             {
                                 $or: [
                                     {
@@ -57,8 +58,7 @@ let EntryResolver = class EntryResolver {
                                         content: { $regex: new RegExp(keywords.join('|') || /./g) }
                                     },
                                 ]
-                            },
-                            {
+                            }, {
                                 $or: [
                                     {
                                         $and: [
@@ -92,6 +92,7 @@ let EntryResolver = class EntryResolver {
                     where: {
                         $and: [
                             { book: { $regex: new RegExp(books.join('|') || /./g) } },
+                            { tags: { $elemMatch: { $in: tags } } },
                             {
                                 $or: [
                                     { header: { $regex: new RegExp(keywords.join('|') || /./g) } },
@@ -172,9 +173,10 @@ __decorate([
     __param(1, type_graphql_1.Arg("clean", { defaultValue: false })),
     __param(2, type_graphql_1.Arg("keywords", _ => [String], { defaultValue: [] })),
     __param(3, type_graphql_1.Arg("dates", _ => [Date_1.Date], { defaultValue: [] })),
-    __param(4, type_graphql_1.Arg("books", _ => [String], { defaultValue: [] })),
+    __param(4, type_graphql_1.Arg("tags", _ => [String], { defaultValue: [] })),
+    __param(5, type_graphql_1.Arg("books", _ => [String], { defaultValue: [] })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Boolean, Array, Array, Array]),
+    __metadata("design:paramtypes", [Number, Boolean, Array, Array, Array, Array]),
     __metadata("design:returntype", Promise)
 ], EntryResolver.prototype, "entries", null);
 __decorate([

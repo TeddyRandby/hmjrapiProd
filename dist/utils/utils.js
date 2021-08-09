@@ -44,7 +44,7 @@ function dateGreaterThanOrEqualTo(a, b) {
 }
 exports.dateGreaterThanOrEqualTo = dateGreaterThanOrEqualTo;
 let CleanBooks = [];
-for (let i = parseInt(process.env.CLEAN_BOOKS_START); i < parseInt(process.env.CLEAN_BOOKS_END); i++) {
+for (let i = parseInt(process.env.CLEAN_BOOKS_START || "0"); i < parseInt(process.env.CLEAN_BOOKS_END || "0"); i++) {
     CleanBooks.push(`${i}`);
 }
 function findBooks(clean, books) {
@@ -62,9 +62,8 @@ function findBooks(clean, books) {
     }
 }
 exports.findBooks = findBooks;
-["tedrandby@gmail.com", "HMJRVerifier", "agondek@rooseveltinstitue.org"];
 function validateAuthor(author) {
-    return process.env.VALID_AUTHORS.split(' ').includes(author);
+    return (process.env.VALID_AUTHORS || "").split(' ').includes(author);
 }
 exports.validateAuthor = validateAuthor;
 //# sourceMappingURL=utils.js.map
