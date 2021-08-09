@@ -31,6 +31,35 @@ import {
 
     books = newBooks;
 
+    interface Query {
+      take: number,
+      where: {
+        $and: any[]
+      },
+    }
+
+    let query: Query = {
+      take: 0,
+      where: {
+        $and: [],
+      }
+    }
+
+    query.take = max;
+    query.where.$and = [];
+
+    if (books.length > 0) {
+      query.where.$and.push(
+        { book: { $in: books } }
+      );
+    }
+
+    if (tags.length > 0) {
+      query.where.$and.push(
+        { tags: { $elemMatch: { $in: tags } } },
+      );
+    }
+
     if (dates.length > 0) {
       const minDate = findLeastDate(dates) ?? {
         day: 100, month: 100, year: 100
@@ -38,67 +67,49 @@ import {
       const maxDate = findGreatestDate(dates)
         ?? { day: 0, month: 0, year: 0 }
 
-      entries = await getMongoRepository(Entry).find({
-        take: max,
-        where: {
-          $and: [
-            { book: { $regex: new RegExp(books.join('|') || /./g) } },
-            { tags: { $elemMatch: { $in: tags } } },
-            {
-              $or: [
-                {
-                  header:
-                    { $regex: new RegExp(keywords.join('|') || /./g) }
-                },
-                {
-                  content:
-                    { $regex: new RegExp(keywords.join('|') || /./g) }
-                },
-              ]
-            }, {
-              $or: [
-                {
-                  $and: [
-                    { "minDate.day": { $lte: maxDate.day } },
-                    { "minDate.month": { $lte: maxDate.month } },
-                    { "minDate.year": { $lte: maxDate.year } },
-                    { "minDate.day": { $gte: minDate.day } },
-                    { "minDate.month": { $gte: minDate.month } },
-                    { "minDate.year": { $gte: minDate.year } },
-                  ],
-                },
-                {
-                  $and: [
-                    { "maxDate.day": { $lte: minDate.day } },
-                    { "maxDate.month": { $lte: minDate.month } },
-                    { "maxDate.year": { $lte: minDate.year } },
-                    { "maxDate.day": { $gte: maxDate.day } },
-                    { "maxDate.month": { $gte: maxDate.month } },
-                    { "maxDate.year": { $gte: maxDate.year } },
-                  ],
-                },
-              ],
-            },
-          ]
-        }
-      })
-    } else {
-      entries = await getMongoRepository(Entry).find({
-        take: max,
-        where: {
-          $and: [
-            { book: { $regex: new RegExp(books.join('|') || /./g) } },
-            { tags: { $elemMatch: { $in: tags } } },
-            {
-              $or: [
-                { header: { $regex: new RegExp(keywords.join('|') || /./g) } },
-                { content: { $regex: new RegExp(keywords.join('|') || /./g) } },
-              ]
-            },
-          ]
-        }
+      query.where.$and.push({
+        $or: [
+          {
+            $and: [
+              { "minDate.day": { $lte: maxDate.day } },
+              { "minDate.month": { $lte: maxDate.month } },
+              { "minDate.year": { $lte: maxDate.year } },
+              { "minDate.day": { $gte: minDate.day } },
+              { "minDate.month": { $gte: minDate.month } },
+              { "minDate.year": { $gte: minDate.year } },
+            ],
+          },
+          {
+            $and: [
+              { "maxDate.day": { $lte: minDate.day } },
+              { "maxDate.month": { $lte: minDate.month } },
+              { "maxDate.year": { $lte: minDate.year } },
+              { "maxDate.day": { $gte: maxDate.day } },
+              { "maxDate.month": { $gte: maxDate.month } },
+              { "maxDate.year": { $gte: maxDate.year } },
+            ],
+          },
+        ],
+      },
+      )
+    }
+
+    if (keywords.length > 0) {
+      query.where.$and.push({
+        $or: [
+          {
+            header:
+              { $regex: new RegExp(keywords.join('|') || /./g) }
+          },
+          {
+            content:
+              { $regex: new RegExp(keywords.join('|') || /./g) }
+          },
+        ]
       })
     }
+
+    entries = await getMongoRepository(Entry).find(query);
 
     return entries.map(entry => ({
       ...entry,
