@@ -38,7 +38,7 @@ export function dateGreaterThanOrEqualTo(a: Date, b: Date): boolean {
 }
 
 let CleanBooks: string[] = [];
-for (let i = parseInt(process.env.CLEAN_BOOKS_START); i < parseInt(process.env.CLEAN_BOOKS_END); i++) {
+for (let i = parseInt(process.env.CLEAN_BOOKS_START || "0"); i < parseInt(process.env.CLEAN_BOOKS_END || "0"); i++) {
   CleanBooks.push(`${i}`);
 }
 
@@ -54,7 +54,7 @@ export function findBooks(clean: boolean, books: string[]): string[] | null {
     return books;
   }
 }
-["tedrandby@gmail.com", "HMJRVerifier", "agondek@rooseveltinstitue.org"]
+
 export function validateAuthor(author: string): boolean {
-  return process.env.VALID_AUTHORS.split(' ').includes(author);
+  return (process.env.VALID_AUTHORS || "").split(' ').includes(author);
 }
